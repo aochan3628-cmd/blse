@@ -1,0 +1,24 @@
+# シークレット・認証情報（絶対にコミットしない）
+config.js
+*.env
+.env*
+service_account.json
+*_credentials.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# macOS
+.DS_Store
+
+# ログ・一時ファイル
+*.log
+logs/
+heartbeat.txt
+
+# エディタ
+.vscode/

@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLSE — チェック</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="config.js"></script>
+    <script src="sheets.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
+    <style>
+        .pc-nav-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--line-2);
+            background: var(--bg-1);
+            color: var(--t-2);
+            font-size: 1.25rem;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: var(--fast);
+            display: none;
+            /* スマホでは非表示 */
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pc-nav-btn:hover {
+            background: var(--bg-3);
+            color: var(--t-1);
+        }
+
+        @media(min-width:600px) {
+            .pc-nav-btn {
+                display: flex;
+            }
+        }
+
+        /* スマホではスワイプヒントを表示 */
+        .swipe-hint {
+            display: block;
+        }
+
+        @media(min-width:600px) {
+            .swipe-hint {
+                display: none;
+            }
+        }
+
+        .progress-row {
+            display: flex;
+            align-items: center;
+            gap: var(--s3);
+            margin-bottom: var(--s5);
+        }
+
+        .progress-bar-track {
+            flex: 1;
+            height: 4px;
+            background: var(--bg-3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--green);
+            border-radius: 2px;
+            transition: width .5s ease;
+        }
+
+        .progress-label {
+            font-size: .75rem;
+            font-weight: 700;
+            color: var(--t-3);
+            white-space: nowrap;
+        }
+
+        .check-card-wrap {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .check-card {
+            background: var(--bg-2);
+            border: 1px solid var(--line-1);
+            border-radius: var(--r3);
+            overflow: hidden;
+            transition: var(--smooth);
+        }
+
+        .card-photo {
+            width: 100%;
+            height: 180px;
+            background: var(--bg-1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--t-3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .photo-placeholder-icon {
+            width: 40px;
+            height: 40px;
+            opacity: .2;
+        }
+
+        .photo-counter {
+            position: absolute;
+            bottom: 8px;
+            right: 10px;
+            background: rgba(0, 0, 0, .6);
+            padding: 3px 10px;
+            border-radius: 100px;
+            font-size: .625rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: .04em;
+        }
+
+        .photo-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, .5);
+            border: none;
+            color: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: .75rem;
+            transition: var(--fast);
+        }
+
+        .photo-nav:hover {
+            background: rgba(0, 0, 0, .8);
+        }
+
+        .photo-nav.prev {
+            left: 8px;
+        }
+
+        .photo-nav.next {
+            right: 8px;
+        }
+
+        .photo-select-btn {
+            position: absolute;
+            bottom: 8px;
+            left: 10px;
+            background: rgba(0, 0, 0, .6);
+            border: 1px solid rgba(255, 255, 255, .15);
+            color: rgba(255, 255, 255, .8);
+            padding: 3px 10px;
+            border-radius: 100px;
+            font-size: .625rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--fast);
+            font-family: var(--sans);
+        }
+
+        .photo-select-btn:hover {
+            background: rgba(0, 0, 0, .85);
+            color: #fff;
+        }
+
+        .photo-select-btn.sel {
+            background: var(--green);
+            border-color: var(--green);
+            color: #fff;
+        }
+
+        .card-body {
+            padding: var(--s4);
+        }
+
+        .card-head-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 4px;
+        }
+
+        .company-name {
+            font-size: 1.0625rem;
+            font-weight: 800;
+            letter-spacing: -.025em;
+        }
+
+        .gbp-link {
+            font-size: .7rem;
+            color: var(--blue);
+            text-decoration: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .gbp-link:hover {
+            text-decoration: underline;
+        }
+
+        .card-meta {
+            font-size: .75rem;
+            color: var(--t-3);
+            margin-bottom: var(--s4);
+            display: flex;
+            gap: var(--s2);
+            flex-wrap: wrap;
+        }
+
+        .diag-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--s1);
+            margin-bottom: var(--s4);
+        }
+
+        .diag-item {
+            padding: 6px 10px;
+            background: var(--bg-1);
+            border: 1px solid var(--line-1);
+            border-radius: var(--r1);
+            font-size: .75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .di-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .diag-item.bad .di-dot {
+            background: var(--red);
+        }
+
+        .diag-item.ok .di-dot {
+            background: var(--green);
+        }
+
+        .diag-item.warn .di-dot {
+            background: var(--yellow);
+        }
+
+        .diag-item.bad {
+            color: var(--red);
+        }
+
+        .diag-item.ok {
+            color: var(--green);
+        }
+
+        .diag-item.warn {
+            color: var(--yellow);
+        }
+
+        .card-contact {
+            font-size: .8125rem;
+            color: var(--t-3);
+            padding: var(--s3) 0;
+            border-top: 1px solid var(--line-1);
+            border-bottom: 1px solid var(--line-1);
+            margin-bottom: var(--s4);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .card-contact a {
+            color: var(--blue);
+            text-decoration: none;
+        }
+
+        .check-section-lbl {
+            font-size: .625rem;
+            font-weight: 700;
+            color: var(--t-3);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: var(--s2);
+        }
+
+        .check-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--s1);
+            margin-bottom: var(--s4);
+        }
+
+        .ci {
+            display: flex;
+            align-items: center;
+            gap: var(--s2);
+            padding: 9px 12px;
+            background: var(--bg-1);
+            border: 1px solid var(--line-1);
+            border-radius: var(--r1);
+            cursor: pointer;
+            transition: var(--fast);
+            user-select: none;
+        }
+
+        .ci:hover {
+            border-color: var(--line-2);
+        }
+
+        .ci.checked {
+            background: var(--green-dim);
+            border-color: var(--green);
+        }
+
+        .ci-box {
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid var(--line-2);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .625rem;
+            color: transparent;
+            flex-shrink: 0;
+            transition: var(--fast);
+        }
+
+        .ci.checked .ci-box {
+            background: var(--green);
+            border-color: var(--green);
+            color: #fff;
+        }
+
+        .ci-label {
+            font-size: .8125rem;
+            font-weight: 600;
+            color: var(--t-2);
+        }
+
+        .ci.checked .ci-label {
+            color: var(--green);
+        }
+
+        .ci.full {
+            grid-column: 1 / -1;
+        }
+
+        .action-row {
+            display: flex;
+            gap: var(--s2);
+            max-width: 480px;
+            margin: var(--s4) auto 0;
+        }
+
+        .action-row .btn {
+            flex: 1;
+            padding: 13px;
+            font-size: .875rem;
+        }
+
+        .check-counter {
+            text-align: center;
+            font-size: .6875rem;
+            color: var(--t-3);
+            margin-top: var(--s2);
+            font-weight: 600;
+            letter-spacing: .03em;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <span class="topbar-logo">BLSE</span>
+        <div class="topbar-right">
+            <span class="topbar-user">嫁</span>
+            <button class="topbar-menu-btn" onclick="toggleMenu()">
+                <span class="hamburger"><span></span><span></span><span></span></span>
+            </button>
+        </div>
+    </header>
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+    <nav class="slide-menu" id="slideMenu">
+        <button class="menu-close" onclick="toggleMenu()">&#x2715;</button>
+        <div class="menu-section-label">メニュー</div>
+        <a href="index.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="1" width="6" height="6" rx="1" fill="currentColor" />
+                <rect x="9" y="1" width="6" height="6" rx="1" fill="currentColor" />
+                <rect x="1" y="9" width="6" height="6" rx="1" fill="currentColor" />
+                <rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor" />
+            </svg>ダッシュボード</a>
+        <a href="search.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5" />
+                <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>検索</a>
+        <a href="check.html" class="menu-item active"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>チェック</a>
+        <a href="sales.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M2 13l4-4 3 3 5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>営業</a>
+        <a href="inbox.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                <path d="M1 5l7 5 7-5" stroke="currentColor" stroke-width="1.5" />
+            </svg>受信トレイ</a>
+        <a href="log.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M2 4h12M2 8h8M2 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>ログ</a>
+    </nav>
+
+    <main class="main">
+        <!-- 進捗 -->
+        <div class="progress-row animate-in">
+            <span class="progress-label"><span id="doneCount">0</span> / 5</span>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressFill" style="width:0%;"></div>
+            </div>
+            <span class="progress-label" id="cardIndex" style="color:var(--t-3)">1 / 5</span>
+        </div>
+
+        <!-- カード -->
+        <div class="check-card-outer animate-in"
+            style="position:relative;display:flex;align-items:center;gap:var(--s3);">
+            <!-- PC矢印ボタン -->
+            <button class="pc-nav-btn" onclick="navigate('prev')" title="前の会社">&#8249;</button>
+            <div class="check-card-wrap" style="flex:1;">
+                <div class="check-card" id="checkCard">
+                    <div class="card-photo">
+                        <svg class="photo-placeholder-icon" viewBox="0 0 48 48" fill="none">
+                            <rect x="4" y="10" width="40" height="28" rx="3" stroke="currentColor" stroke-width="2" />
+                            <circle cx="17" cy="22" r="4" stroke="currentColor" stroke-width="2" />
+                            <path d="M4 34l10-8 8 6 8-10 14 12" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <span class="photo-counter" id="photoCounter">1 / 10</span>
+                        <button class="photo-nav prev" onclick="photoNav('prev')" title="前の写真">&#8249;</button>
+                        <button class="photo-nav next" onclick="photoNav('next')" title="次の写真">&#8250;</button>
+                        <button class="photo-select-btn" id="photoSelectBtn" onclick="togglePhotoSel()">📎
+                            レポートに使う</button>
+                    </div>
+                    <!-- 課題サマリ（写真選定の判断用） -->
+                    <div id="issueSummary" style="
+                        padding:8px 14px;
+                        background:var(--bg-0);
+                        border-top:1px solid var(--line-2);
+                        font-size:.6875rem;
+                        color:var(--t-2);
+                        line-height:1.6;
+                    "></div>
+
+                    <div class="card-body">
+                        <div class="card-head-row">
+                            <div style="display:flex;align-items:center;gap:var(--s2);">
+                                <div class="company-name" id="coName">水野商店</div>
+                                <span id="savedBadge"
+                                    style="display:none;padding:2px 8px;border-radius:100px;font-size:.625rem;font-weight:700;background:var(--green-dim);color:var(--green);">保存済み</span>
+                            </div>
+                            <a href="#" class="gbp-link">GBP を開く</a>
+                        </div>
+                        <div class="card-meta" id="coMeta">古賀市駅東 · 内装工事 · ★ 3.2 (14件) · 写真 25枚</div>
+
+                        <!-- 診断（自動取得分のみ） -->
+                        <div class="diag-grid" id="coDiag">
+                            <div class="diag-item bad">
+                                <div class="di-dot"></div>写真 3枚
+                            </div>
+                            <div class="diag-item bad">
+                                <div class="di-dot"></div>投稿 0件
+                            </div>
+                            <div class="diag-item warn">
+                                <div class="di-dot"></div>口コミ 14件
+                            </div>
+                            <div class="diag-item ok">
+                                <div class="di-dot"></div>営業時間あり
+                            </div>
+                        </div>
+
+                        <!-- 連絡先 -->
+                        <div class="card-contact">
+                            <span id="coEmail">info@mizuno-shouten.com</span>
+                            <span><a id="coUrl" href="#">mizuno-shouten.com/contact</a></span>
+                        </div>
+
+                        <!-- 目視チェック -->
+                        <div class="check-section-lbl">目視チェック</div>
+                        <div class="check-grid" id="ciGrid">
+                            <div class="ci" onclick="toggleCI(this)">
+                                <div class="ci-box">&#x2713;</div><span class="ci-label">外観</span>
+                            </div>
+                            <div class="ci" onclick="toggleCI(this)">
+                                <div class="ci-box">&#x2713;</div><span class="ci-label">施工事例</span>
+                            </div>
+                            <div class="ci" onclick="toggleCI(this)">
+                                <div class="ci-box">&#x2713;</div><span class="ci-label">スタッフ</span>
+                            </div>
+                            <div class="ci" onclick="toggleCI(this)">
+                                <div class="ci-box">&#x2713;</div><span class="ci-label">作業中</span>
+                            </div>
+                            <div class="ci" onclick="toggleCI(this)">
+                                <div class="ci-box">&#x2713;</div><span class="ci-label">ロゴ</span>
+                            </div>
+                            <div class="ci" onclick="toggleCI(this)">
+                                <div class="ci-box">&#x2713;</div><span class="ci-label">資格</span>
+                            </div>
+                            <div class="ci full" onclick="toggleCI(this)">
+                                <div class="ci-box">&#x2713;</div><span class="ci-label">口コミ返信 — GBPで目視確認</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /.check-card-wrap -->
+            <button class="pc-nav-btn" onclick="navigate('next')" title="次の会社">&#8250;</button>
+        </div><!-- /.check-card-outer -->
+
+        <!-- アクション -->
+        <div class="action-row animate-in" style="justify-content:center;gap:12px;">
+            <button class="btn"
+                style="min-width:100px;padding:14px;border:1.5px solid var(--red);color:var(--red);background:transparent;"
+                onclick="rejectCurrent()">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+                却下
+            </button>
+            <button class="btn btn-success" style="min-width:160px;padding:14px;" onclick="saveCurrentAndNext()">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8l4 4 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                保存
+            </button>
+        </div>
+        <!-- PDF / メール送信アクション -->
+        <div class="action-row animate-in" id="pdfActionRow" style="justify-content:center;gap:8px;display:none;">
+            <button class="btn" id="btnSavePdf"
+                style="min-width:130px;padding:12px;border:1.5px solid var(--accent);color:var(--accent);background:transparent;"
+                onclick="savePdf()">
+                📄 PDF保存
+            </button>
+            <button class="btn" id="btnMailGo" style="min-width:130px;padding:12px;background:var(--accent);color:#000;"
+                onclick="sendEmailWithPdf()" disabled>
+                📤 メールGO
+            </button>
+        </div>
+        <!-- フォーム送信アクション（form_urlがある場合のみ表示） -->
+        <div class="action-row animate-in" id="formActionRow" style="justify-content:center;gap:8px;display:none;">
+            <button class="btn" id="btnFormSend"
+                style="min-width:200px;padding:12px;border:1.5px solid var(--accent);color:var(--accent);background:transparent;"
+                onclick="sendForm()">
+                📋 フォーム送信（Playwright）
+            </button>
+        </div>
+        <div class="check-counter animate-in" id="ciCounter">0 / 7 チェック済み</div>
+        <div style="text-align:center;font-size:.6875rem;color:var(--t-3);margin-top:var(--s2);">← スワイプで会社を切り替え →</div>
+    </main>
+
+    <script>
+        const USER = localStorage.getItem('blse_user') || 'AOKI';
+
+        // シート列インデックス（sheets_clientと同定義）
+        const COL = {
+            place_id: 0, name: 1, address: 2, phone: 3, website: 4, gbp: 5,
+            rating: 6, review_count: 7, drive_folder: 8, photo_count: 9,
+            has_hours: 10, biz_type: 11, desc: 12, tab: 13,
+            ssl: 14, is_mobile: 15, is_old: 16,
+            email: 17, form_url: 18, refused: 19, has_captcha: 20,
+            photo_check: 21, screenshot1: 22, screenshot2: 23,
+            weak_tags: 24, priority_score: 25, sales_text: 26,
+            operator: 27, send_method: 28, sent_status: 29,
+            sent_at: 30, acquired: 31, reply_status: 32, review_reply: 33,
+        };
+
+        let companies = [];  // 未チェック（HP有り）シートの行データ
+        let current = 0;
+        let saved = new Set();
+        let TOTAL = 0;
+        let pollTimer = null;
+        let _heartbeatTimer = null;  // R1: ロックハートビートタイマー
+        const LOCK_TIMEOUT_MS = 10 * 60 * 1000;  // R2: 10分タイムアウト
+        const HEARTBEAT_MS = 30 * 1000;        // R1: 30秒ハートビート
+
+        // ── 写真スワイプ状態 ──────────────────────────────────────────
+        let _photos = [];         // { url, name }[] — 現在のカードの写真リスト（最大10枚）
+        let _photoIdx = 0;        // 現在表示中のインデックス
+        let _selectedPhotos = []; // 選択したURLリスト（最大2枚）
+
+        function _rowToObj(row) {
+            const g = (k) => (Array.isArray(row) ? row[COL[k]] : row[k]) || '';
+            return {
+                name: g('name'),
+                address: g('address'),
+                phone: g('phone'),
+                website: g('website'),
+                rating: parseFloat(g('rating')) || null,
+                review_count: parseInt(g('review_count')) || 0,
+                photo_count: parseInt(g('photo_count')) || 0,
+                has_hours: g('has_hours') === '有',
+                email: g('email'),
+                form_url: g('form_url'),
+                priority_score: parseInt(g('priority_score')) || 0,
+                operator: g('operator'),
+            };
+        }
+
+        // ── ロック値パーサー ───────────────────────────────────────────
+        // operator列の書式: "USER" or "USER_ISO8601" （ハートビートあり）
+        function _parseLock(val) {
+            if (!val) return { user: '', ts: 0 };
+            const sep = val.lastIndexOf('_');
+            if (sep < 0) return { user: val, ts: 0 };
+            const user = val.slice(0, sep);
+            const ts = Date.parse(val.slice(sep + 1));
+            return { user, ts: isNaN(ts) ? 0 : ts };
+        }
+
+        // R2: ロックが有効かどうか（10分以内 or タイムスタンプなし）
+        function _isLockActive(operatorVal) {
+            if (!operatorVal) return false;
+            const { user, ts } = _parseLock(operatorVal);
+            if (user === USER) return false;  // 自分のロックは無視
+            if (ts === 0) return true;         // 旧形式（タイムスタンプなし）→ ロック有効扱い
+            return Date.now() - ts < LOCK_TIMEOUT_MS;  // 10分以内ならロック有効
+        }
+
+        // R1: ハートビート開始（30秒ごとにtimestampを更新）
+        function startHeartbeat(c) {
+            stopHeartbeat();  // 前のタイマーをクリア
+            function _beat() {
+                const val = USER + '_' + new Date().toISOString();
+                Sheets.updateCellByHeader(
+                    CONFIG.SHEETS.UNCHECKED_HP, c._rowIndex, '担当者', val
+                ).catch(() => { });
+            }
+            _beat();  // 即時1発
+            _heartbeatTimer = setInterval(_beat, HEARTBEAT_MS);
+        }
+
+        // R1: ハートビート停止
+        function stopHeartbeat() {
+            if (_heartbeatTimer) { clearInterval(_heartbeatTimer); _heartbeatTimer = null; }
+        }
+
+        // 未チェック（HP有り）からロックが空の行だけ取得
+        async function loadCompanies() {
+            try {
+                const rows = await Sheets.readAll(CONFIG.SHEETS.UNCHECKED_HP);
+                companies = rows
+                    .map((r, i) => ({ ...r, _rowIndex: i + 2, ...(_rowToObj(r)) }))
+                    .filter(c => !_isLockActive(c.operator));  // R2: タイムアウトした他人ロックはスルー
+                TOTAL = companies.length;
+                if (TOTAL > 0) { renderCard(0, 'init'); updateProgress(); }
+                else { document.getElementById('coName').textContent = 'チェック待ちなし'; }
+            } catch (e) {
+                document.getElementById('coName').textContent = 'Sheets読み込み失敗: ' + e.message;
+            }
+        }
+
+        // 5秒ポーリング（別のユーザーが処理した行を除去）
+        function startPolling() {
+            pollTimer = setInterval(async () => {
+                try {
+                    const rows = await Sheets.readAll(CONFIG.SHEETS.UNCHECKED_HP);
+                    const fresh = rows.map((r, i) => ({ ...r, _rowIndex: i + 2, ..._rowToObj(r) }))
+                        .filter(c => !_isLockActive(c.operator));  // R2: タイムアウト解除
+                    if (TOTAL > 0 && !fresh.find(c => c.name === companies[current]?.name)) {
+                        companies = fresh; TOTAL = fresh.length; current = 0;
+                        if (TOTAL > 0) { renderCard(0, 'init'); updateProgress(); }
+                    }
+                } catch (_) { }
+            }, 5000);
+        }
+
+        // カード描画
+        function renderCard(idx, dir) {
+            if (!companies[idx]) return;
+            const c = companies[idx];
+            const card = document.getElementById('checkCard');
+
+            card.style.transition = 'none';
+            card.style.transform = dir === 'left' ? 'translateX(60px)' : dir === 'right' ? 'translateX(-60px)' : 'translateY(8px)';
+            card.style.opacity = '0';
+
+            document.getElementById('coName').textContent = c.name;
+            document.getElementById('coMeta').textContent =
+                (c.address || '') + ' · ★ ' + (c.rating || '—') + ' (' + c.review_count + '件) · 写真 ' + c.photo_count + '枚';
+            document.getElementById('coEmail').textContent = c.email || '—';
+            document.getElementById('coUrl').textContent = c.website || '—';
+            document.getElementById('coUrl').href = c.website || '#';
+            document.getElementById('photoCounter').textContent = '1 / ' + Math.min(c.photo_count, 10);
+            document.getElementById('cardIndex').textContent = (idx + 1) + ' / ' + TOTAL;
+            document.getElementById('savedBadge').style.display = saved.has(c.name) ? 'inline-flex' : 'none';
+
+            // 診断タグ
+            const diagItems = [
+                { label: '写真 ' + c.photo_count + '枚', cls: c.photo_count <= 3 ? 'bad' : c.photo_count <= 6 ? 'warn' : 'ok' },
+                { label: '口コミ ' + c.review_count + '件', cls: c.review_count <= 5 ? 'bad' : 'ok' },
+                { label: '営業時間' + (c.has_hours ? 'あり' : '未設定'), cls: c.has_hours ? 'ok' : 'bad' },
+                { label: c.form_url ? 'フォームあり' : c.email ? 'メアドあり' : '連絡手段なし', cls: (c.form_url || c.email) ? 'ok' : 'bad' },
+            ];
+            document.getElementById('coDiag').innerHTML = diagItems.map(di =>
+                `<div class="diag-item ${di.cls}"><div class="di-dot"></div>${di.label}</div>`
+            ).join('');
+
+            resetChecks();
+
+            // R1: ロック開始（担当者列に「USER_ISO8601」を書き、30秒ごとに更新）
+            startHeartbeat(c);
+
+            requestAnimationFrame(() => {
+                card.style.transition = 'transform .25s ease, opacity .22s ease';
+                card.style.transform = 'translateX(0) translateY(0)';
+                card.style.opacity = '1';
+            });
+
+            // PDFアクション行をリセット＆表示
+            _currentPdfDriveId = null;
+            const savePdfBtn = document.getElementById('btnSavePdf');
+            const mailGoBtn = document.getElementById('btnMailGo');
+            savePdfBtn.disabled = false;
+            savePdfBtn.textContent = '📄 PDF保存';
+            savePdfBtn.style.color = 'var(--accent)';
+            savePdfBtn.style.borderColor = 'var(--accent)';
+            mailGoBtn.disabled = true;
+            mailGoBtn.textContent = '📤 メールGO';
+            mailGoBtn.style.background = 'var(--accent)';
+            _showPdfActions();
+
+            // Drive写真を読み込み（非同期・カード切替後に実行）
+            const driveFolderUrl = Array.isArray(companies[idx]) ? companies[idx][COL.drive_folder] : companies[idx].drive_folder || '';
+            loadPhotos(driveFolderUrl);
+        }
+
+        function navigate(dir) {
+            if (dir === 'prev' && current > 0) { current--; renderCard(current, 'right'); }
+            else if (dir === 'next' && current < TOTAL - 1) { current++; renderCard(current, 'left'); }
+            updateProgress();
+        }
+
+        // ── Drive写真読み込み（GDriveフォルダURLからファイル一覧を取得） ──
+        async function loadPhotos(driveFolderUrl) {
+            _photos = [];
+            _photoIdx = 0;
+            _selectedPhotos = [];
+            _renderPhotoArea();
+
+            if (!driveFolderUrl || !driveFolderUrl.startsWith('https://drive.google.com')) return;
+
+            // フォルダIDを抽出
+            const match = driveFolderUrl.match(/folders\/([a-zA-Z0-9_-]+)/);
+            if (!match) return;
+            const folderId = match[1];
+
+            try {
+                // Drive API v3: フォルダ内の画像ファイルを最大10件取得
+                const token = await _getDriveToken();
+                if (!token) { console.warn('Drive token不可 — 写真スキップ'); return; }
+
+                const q = encodeURIComponent(`'${folderId}' in parents and mimeType contains 'image/' and trashed=false`);
+                const url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,webContentLink)&pageSize=10&orderBy=name`;
+                const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+                if (!res.ok) throw new Error(`Drive API ${res.status}`);
+                const data = await res.json();
+                _photos = (data.files || []).slice(0, 10).map(f => ({
+                    url: `https://drive.google.com/uc?export=view&id=${f.id}`,
+                    name: f.name,
+                    id: f.id,
+                }));
+            } catch (e) {
+                console.warn('Drive写真取得失敗:', e.message);
+            }
+            _renderPhotoArea();
+        }
+
+        // Drive APIトークン（OAuth2）を取得。auth.jsがgapi.auth2を初期化済み前提
+        async function _getDriveToken() {
+            try {
+                if (window.gapi && gapi.auth2) {
+                    const authInst = gapi.auth2.getAuthInstance();
+                    if (authInst && authInst.isSignedIn.get()) {
+                        return authInst.currentUser.get().getAuthResponse().access_token;
+                    }
+                }
+            } catch (e) { /* ignoring */ }
+            return null;
+        }
+
+        function _renderPhotoArea() {
+            const area = document.querySelector('.card-photo');
+            if (!area) return;
+
+            const total = _photos.length;
+            const counter = document.getElementById('photoCounter');
+            counter.textContent = total ? `${_photoIdx + 1} / ${total}` : '写真なし';
+
+            // 既存 <img> を除去してから再描画
+            const oldImg = area.querySelector('img.drive-photo');
+            if (oldImg) oldImg.remove();
+            const oldPlaceholder = area.querySelector('.photo-placeholder-icon');
+
+            if (total === 0) {
+                if (oldPlaceholder) oldPlaceholder.style.display = '';
+                return;
+            }
+            if (oldPlaceholder) oldPlaceholder.style.display = 'none';
+
+            const img = document.createElement('img');
+            img.className = 'drive-photo';
+            img.src = _photos[_photoIdx].url;
+            img.alt = _photos[_photoIdx].name;
+            img.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:0;';
+            img.onerror = () => { img.style.display = 'none'; if (oldPlaceholder) oldPlaceholder.style.display = ''; };
+            area.insertBefore(img, area.querySelector('.photo-counter'));
+
+            // prev/next ボタンの活性
+            const prevBtn = area.querySelector('.photo-nav.prev');
+            const nextBtn = area.querySelector('.photo-nav.next');
+            if (prevBtn) prevBtn.style.opacity = _photoIdx === 0 ? '0.3' : '1';
+            if (nextBtn) nextBtn.style.opacity = _photoIdx >= total - 1 ? '0.3' : '1';
+
+            // 選択状態を反映
+            const selBtn = document.getElementById('photoSelectBtn');
+            const isSelected = _selectedPhotos.includes(_photos[_photoIdx].url);
+            selBtn.classList.toggle('sel', isSelected);
+            selBtn.textContent = isSelected ? '選択済み ✓' : '📎 レポートに使う';
+        }
+
+        function photoNav(dir) {
+            const total = _photos.length;
+            if (!total) return;
+            if (dir === 'prev' && _photoIdx > 0) _photoIdx--;
+            else if (dir === 'next' && _photoIdx < total - 1) _photoIdx++;
+            _renderPhotoArea();
+        }
+
+        async function saveCurrentAndNext() {
+            if (!companies[current]) return;
+            const c = companies[current];
+
+            // チェック項目取得
+            const checkedItems = [...document.querySelectorAll('.ci.checked')].map(el => el.dataset.label).join(',');
+
+            // 送信チャンネル判定と違コピー SHEETS目標
+            const hasEmail = !!c.email;
+            const hasForm = !!c.form_url;
+            const dstSheet = hasEmail ? CONFIG.SHEETS.CHECKED_EMAIL
+                : hasForm ? CONFIG.SHEETS.CHECKED_FORM
+                    : CONFIG.SHEETS.UNSENDABLE;
+
+            // 元行の全データを取得してコピー
+            try {
+                stopHeartbeat();  // R1: 保存前にハートビート停止
+                const allRows = await Sheets.readAll(CONFIG.SHEETS.UNCHECKED_HP);
+                const srcRow = Object.values(allRows[c._rowIndex - 2] || {});
+                await Sheets.moveRow(CONFIG.SHEETS.UNCHECKED_HP, c._rowIndex, dstSheet, srcRow);
+                saved.add(c.name);
+                updateProgress();
+                document.getElementById('savedBadge').style.display = 'inline-flex';
+                // 操作ログ記録
+                const channel = hasEmail ? 'メール' : hasForm ? 'フォーム' : '送信不可';
+                writeOperationLog('保存', c.name, channel).catch(() => { });
+                companies.splice(current, 1);
+                TOTAL = companies.length;
+                if (TOTAL > 0) { setTimeout(() => { current = Math.min(current, TOTAL - 1); renderCard(current, 'left'); }, 400); }
+                else { document.getElementById('coName').textContent = 'リストが空です'; }
+            } catch (e) {
+                alert('保存失敗: ' + e.message);
+            }
+        }
+
+        async function skipCurrent() {
+            if (!companies[current]) return;
+            const c = companies[current];
+            stopHeartbeat();  // R1: ハートビート停止
+            // 担当者列をクリア（アンロック）
+            await Sheets.updateCellByHeader(CONFIG.SHEETS.UNCHECKED_HP, c._rowIndex, '担当者', '').catch(() => { });
+            if (current < TOTAL - 1) { navigate('next'); }
+        }
+
+        async function rejectCurrent() {
+            if (!companies[current]) return;
+            const c = companies[current];
+            try {
+                stopHeartbeat();  // R1: ハートビート停止
+                const allRows = await Sheets.readAll(CONFIG.SHEETS.UNCHECKED_HP);
+                const srcRow = Object.values(allRows[c._rowIndex - 2] || {});
+                await Sheets.moveRow(CONFIG.SHEETS.UNCHECKED_HP, c._rowIndex, CONFIG.SHEETS.UNSENDABLE, srcRow);
+                // 操作ログ記録
+                writeOperationLog('却下', c.name, '送信不可').catch(() => { });
+                companies.splice(current, 1);
+                TOTAL = companies.length;
+                if (TOTAL === 0) { document.getElementById('coName').textContent = 'リストが空です'; return; }
+                if (current >= TOTAL) current = TOTAL - 1;
+                renderCard(current, 'left');
+                updateProgress();
+            } catch (e) { alert('却下失敗: ' + e.message); }
+        }
+
+        function updateProgress() {
+            const pct = saved.size / (TOTAL || 1) * 100;
+            document.getElementById('progressFill').style.width = pct + '%';
+            document.getElementById('doneCount').textContent = saved.size;
+        }
+
+        // 操作ログを「操作ログ」シートに記録
+        async function writeOperationLog(action, target, detail) {
+            const user = window.BLSE_USER || localStorage.getItem('blseUser') || 'AOKI';
+            await Sheets.append(CONFIG.SHEETS.OPERATION_LOG, [
+                new Date().toISOString(),
+                user,
+                action,
+                target,
+                detail || '',
+            ]);
+        }
+
+        // ── PDF保存 ────────────────────────────────────────────────────
+        let _currentPdfDriveId = null;
+
+        function _showPdfActions() {
+            const c = companies[current];
+            if (!c) return;
+            const hasEmail = !!(c.email && c.email.includes('@'));
+            document.getElementById('pdfActionRow').style.display = 'flex';
+            document.getElementById('btnMailGo').disabled = !hasEmail;
+            document.getElementById('btnMailGo').title = hasEmail ? '' : 'メールアドレスなし';
+            // フォーム送信エリア
+            const hasForm = !!(c.form_url);
+            const formRow = document.getElementById('formActionRow');
+            formRow.style.display = hasForm ? 'flex' : 'none';
+        }
+
+        async function savePdf() {
+            const c = companies[current];
+            if (!c) return;
+            const btn = document.getElementById('btnSavePdf');
+            btn.disabled = true;
+            btn.textContent = '生成中...';
+            try {
+                // カードエリアをPDF化
+                const el = document.getElementById('checkCard');
+                const opt = {
+                    margin: 4,
+                    filename: 'report_' + c.name + '.pdf',
+                    image: { type: 'jpeg', quality: 0.92 },
+                    html2canvas: { scale: 2, useCORS: true, logging: false },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                };
+                const pdfBlob = await html2pdf().from(el).set(opt).outputPdf('blob');
+
+                // Blob → Base64
+                const base64 = await new Promise((res, rej) => {
+                    const reader = new FileReader();
+                    reader.onload = () => res(reader.result.split(',')[1]);
+                    reader.onerror = rej;
+                    reader.readAsDataURL(pdfBlob);
+                });
+
+                // GAS経由でDriveに保存
+                const resp = await fetch(CONFIG.GAS_EMAIL_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        secret: CONFIG.GAS_SECRET,
+                        action: 'saveFile',
+                        filename: 'report_' + c.name + '.pdf',
+                        mimeType: 'application/pdf',
+                        base64,
+                    }),
+                });
+                const result = await resp.json();
+                if (!result.ok) throw new Error(result.error || 'Drive保存失敗');
+
+                _currentPdfDriveId = result.fileId;
+                btn.textContent = '📄 保存済み ✓';
+                btn.style.color = 'var(--green)';
+                btn.style.borderColor = 'var(--green)';
+                // メールGOを有効化（メアドある場合のみ）
+                const hasEmail = !!(c.email && c.email.includes('@'));
+                if (hasEmail) document.getElementById('btnMailGo').disabled = false;
+            } catch (e) {
+                btn.disabled = false;
+                btn.textContent = '📄 PDF保存';
+                alert('PDF生成失敗: ' + e.message);
+            }
+        }
+
+        async function sendEmailWithPdf() {
+            const c = companies[current];
+            if (!c || !c.email) return;
+            // PDF未生成なら自動で先に保存する
+            if (!_currentPdfDriveId) {
+                await savePdf();
+                if (!_currentPdfDriveId) return; // savePdf内でエラーの場合は中断
+            }
+            const btn = document.getElementById('btnMailGo');
+            btn.disabled = true;
+            btn.textContent = '送信中...';
+            try {
+                const salesText = c.sales_text || c[COL.sales_text] || '';
+                const resp = await fetch(CONFIG.GAS_EMAIL_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        secret: CONFIG.GAS_SECRET,
+                        to: c.email,
+                        subject: 'GBP診断レポート — ' + c.name,
+                        body: salesText || 'お世話になっております。Blue Life 青木と申します。\n\nGBP診断レポートをお送りします。',
+                        companyName: c.name,
+                        pdfDriveId: _currentPdfDriveId,
+                    }),
+                });
+                const result = await resp.json();
+                if (!result.ok) throw new Error(result.error || 'GAS送信失敗');
+                btn.textContent = '📤 送信済み ✓';
+                btn.style.background = 'var(--green)';
+                writeOperationLog('メール送信', c.name, c.email).catch(() => { });
+            } catch (e) {
+                btn.disabled = false;
+                btn.textContent = '📤 メールGO';
+                alert('送信失敗: ' + e.message);
+            }
+        }
+
+        async function sendForm() {
+            const c = companies[current];
+            if (!c || !c.form_url) return;
+            const btn = document.getElementById('btnFormSend');
+            btn.disabled = true;
+            btn.textContent = '送信中...';
+            try {
+                const salesText = c.sales_text || c[COL.sales_text] || '';
+                const BACKEND = 'http://localhost:5001';
+                const resp = await fetch(BACKEND + '/api/form/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        form_url: c.form_url,
+                        name: 'Blue Life 青木',
+                        email: 'bluelife.aoki@gmail.com',
+                        phone: '',
+                        body: salesText || 'お世話になっております。Blue Life の青木と申します。\nGBP（Googleビジネスプロフィール）の無料診断を実施しております。',
+                    }),
+                });
+                const result = await resp.json();
+                if (!result.ok) throw new Error(result.error || 'フォーム送信失敗: ' + JSON.stringify(result));
+                btn.textContent = '📋 送信済み ✓';
+                btn.style.color = 'var(--green)';
+                btn.style.borderColor = 'var(--green)';
+                writeOperationLog('フォーム送信', c.name, c.form_url).catch(() => { });
+            } catch (e) {
+                btn.disabled = false;
+                btn.textContent = '📋 フォーム送信（Playwright）';
+                const isOffline = e.message.includes('fetch') || e.message.includes('Failed');
+                alert(isOffline
+                    ? 'バックエンドが起動していません。\nblse-backendを起動してからやり直してください。\n(localhost:5000)'
+                    : 'フォーム送信失敗: ' + e.message
+                );
+            }
+        }
+
+        function resetChecks() {
+
+            document.querySelectorAll('.ci').forEach(c => c.classList.remove('checked'));
+            document.getElementById('ciCounter').textContent = '0 / 7 チェック済み';
+            const btn = document.getElementById('photoSelectBtn');
+            btn.classList.remove('sel'); btn.textContent = 'レポートに使う';
+        }
+
+        // タッチスワイプ
+        (function () {
+            const wrap = document.querySelector('.check-card-wrap');
+            let startX = 0, startY = 0, dragging = false;
+            wrap.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; dragging = true; }, { passive: true });
+            wrap.addEventListener('touchmove', e => {
+                if (!dragging) return;
+                const dx = e.touches[0].clientX - startX, dy = Math.abs(e.touches[0].clientY - startY);
+                if (Math.abs(dx) > dy) { const card = document.getElementById('checkCard'); card.style.transition = 'none'; card.style.transform = 'translateX(' + (dx * 0.4) + 'px)'; }
+            }, { passive: true });
+            wrap.addEventListener('touchend', e => {
+                if (!dragging) return; dragging = false;
+                const dx = e.changedTouches[0].clientX - startX;
+                const card = document.getElementById('checkCard');
+                card.style.transition = 'transform .2s ease'; card.style.transform = 'translateX(0)';
+                if (dx < -50) navigate('next'); else if (dx > 50) navigate('prev');
+            });
+        })();
+
+        function toggleMenu() {
+            document.getElementById('slideMenu').classList.toggle('active');
+            document.getElementById('menuOverlay').classList.toggle('active');
+        }
+        function toggleCI(el) {
+            el.classList.toggle('checked');
+            const total = document.querySelectorAll('.ci').length;
+            const done = document.querySelectorAll('.ci.checked').length;
+            document.getElementById('ciCounter').textContent = done + ' / ' + total + ' チェック済み';
+        }
+        function togglePhotoSel() {
+            if (!_photos.length) return;
+            const url = _photos[_photoIdx].url;
+            const selIdx = _selectedPhotos.indexOf(url);
+            if (selIdx >= 0) {
+                // 選択解除
+                _selectedPhotos.splice(selIdx, 1);
+            } else {
+                if (_selectedPhotos.length >= 2) {
+                    showToast('選択できるのは最大2枚です');
+                    return;
+                }
+                _selectedPhotos.push(url);
+            }
+            _renderPhotoArea();
+
+            // スプシのSCREENSHOT1/SCREENSHOT2列に書き込み
+            const c = companies[current];
+            if (c) {
+                const ss1 = _selectedPhotos[0] || '';
+                const ss2 = _selectedPhotos[1] || '';
+                // X列=SCREENSHOT1(col23), Y列=SCREENSHOT2(col24) — 1始まりで24/25列目
+                Sheets.updateCell(CONFIG.SHEETS.UNCHECKED_HP, c._rowIndex, 23, ss1).catch(e => console.warn('SS1更新失敗', e.message));
+                Sheets.updateCell(CONFIG.SHEETS.UNCHECKED_HP, c._rowIndex, 24, ss2).catch(e => console.warn('SS2更新失敗', e.message));
+            }
+        }
+
+        function showToast(msg) {
+            let el = document.getElementById('_blse_toast');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = '_blse_toast';
+                el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:8px 18px;border-radius:8px;font-size:.8125rem;z-index:9999;transition:opacity .3s;';
+                document.body.appendChild(el);
+            }
+            el.textContent = msg;
+            el.style.opacity = '1';
+            clearTimeout(el._timer);
+            el._timer = setTimeout(() => { el.style.opacity = '0'; }, 2400);
+        }
+
+        // R1: タブを閉じるときに担当者列をクリア（ベストエフォート）
+        window.addEventListener('beforeunload', () => {
+            stopHeartbeat();
+            const c = companies[current];
+            if (c) {
+                // sendBeacon でアンロックリクエストを送信（非同期fetch不可のため）
+                const payload = JSON.stringify({
+                    secret: CONFIG.GAS_SECRET,
+                    action: 'updateCellByHeader',
+                    sheet: CONFIG.SHEETS.UNCHECKED_HP,
+                    row: c._rowIndex,
+                    header: '担当者',
+                    value: '',
+                });
+                navigator.sendBeacon(CONFIG.GAS_EMAIL_URL, new Blob([payload], { type: 'application/json' }));
+            }
+        });
+
+        // 起動（GSIライブラリ読み込み後に実行）
+        window.addEventListener('DOMContentLoaded', () => {
+            loadCompanies();
+            startPolling();
+        });
+    </script>
+    <script>
+        window.onerror = function (msg, src, line, col, err) {
+            var m = '⚠️ [エラー] ' + msg + (src ? ' (' + src.split('/').pop() + ':' + line + ')' : '');
+            if (typeof showToast === 'function') { showToast(m); }
+            return false;
+        };
+    </script>
+</body>
+
+</html>

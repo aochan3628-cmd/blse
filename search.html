@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLSE — 検索</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="sheets.js"></script>
+    <style>
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: .6875rem;
+            font-weight: 700;
+            color: var(--t-3);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
+        .form-input,
+        .form-select {
+            padding: 10px var(--s4);
+            background: var(--bg-1);
+            border: 1px solid var(--line-2);
+            border-radius: var(--r1);
+            color: var(--t-1);
+            font-size: .9375rem;
+            font-family: var(--sans);
+            transition: var(--fast);
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(91, 141, 222, .12);
+        }
+
+        .form-input::placeholder {
+            color: var(--t-3);
+        }
+
+        .form-select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23525260' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+
+        .search-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: var(--s3);
+            align-items: flex-end;
+        }
+
+        @media(max-width:600px) {
+            .search-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .results-area {
+            margin-top: var(--s5);
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--s4);
+        }
+
+        .results-count {
+            font-size: .75rem;
+            color: var(--t-3);
+            font-weight: 600;
+            letter-spacing: .04em;
+        }
+
+        .result-card {
+            background: var(--bg-2);
+            border: 1px solid var(--line-1);
+            border-radius: var(--r2);
+            padding: var(--s4);
+            margin-bottom: var(--s2);
+            transition: var(--mid);
+            cursor: pointer;
+        }
+
+        .result-card:hover {
+            border-color: var(--line-2);
+            background: var(--bg-3);
+        }
+
+        .result-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--s3);
+            margin-bottom: var(--s3);
+        }
+
+        .result-name {
+            font-size: .9375rem;
+            font-weight: 700;
+        }
+
+        .result-location {
+            font-size: .75rem;
+            color: var(--t-3);
+            margin-top: 2px;
+        }
+
+        .result-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: .8125rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            color: var(--yellow);
+        }
+
+        .result-rating span {
+            color: var(--t-3);
+            font-weight: 400;
+        }
+
+        .diag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--s1);
+        }
+
+        .diag-tag {
+            padding: 3px 10px;
+            border-radius: 100px;
+            font-size: .6875rem;
+            font-weight: 600;
+        }
+
+        .diag-tag.bad {
+            background: var(--red-dim);
+            color: var(--red);
+        }
+
+        .diag-tag.ok {
+            background: var(--green-dim);
+            color: var(--green);
+        }
+
+        .diag-tag.warn {
+            background: var(--yellow-dim);
+            color: var(--yellow);
+        }
+
+        .result-cb {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1.5px solid var(--line-2);
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            color: transparent;
+            font-size: .6875rem;
+            font-weight: 700;
+            transition: var(--fast);
+        }
+
+        .result-cb.checked {
+            background: var(--blue);
+            border-color: var(--blue);
+            color: #fff;
+        }
+
+        .log-tbl {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .log-tbl th {
+            text-align: left;
+            font-size: .625rem;
+            font-weight: 700;
+            color: var(--t-3);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            padding: 6px var(--s3);
+            border-bottom: 1px solid var(--line-1);
+        }
+
+        .log-tbl td {
+            font-size: .8125rem;
+            padding: 9px var(--s3);
+            border-bottom: 1px solid var(--line-1);
+            color: var(--t-2);
+        }
+
+        .log-tbl tr:last-child td {
+            border-bottom: none;
+        }
+
+        .log-tbl tr:hover td {
+            background: var(--bg-1);
+        }
+
+        .log-query {
+            color: var(--t-1);
+            font-weight: 600;
+        }
+
+        .batch-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-1);
+            border-top: 1px solid var(--line-2);
+            padding: var(--s3) var(--s4);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 500;
+            transform: translateY(100%);
+            transition: var(--smooth);
+        }
+
+        .batch-bar.visible {
+            transform: translateY(0);
+        }
+
+        .batch-label {
+            font-size: .875rem;
+            font-weight: 600;
+        }
+
+        .batch-count {
+            color: var(--blue);
+        }
+
+        @media(min-width:768px) {
+            .results-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: var(--s3);
+            }
+
+            .results-grid .result-card {
+                margin-bottom: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <span class="topbar-logo">BLSE</span>
+        <div class="topbar-right">
+            <span class="topbar-user">AOKI</span>
+            <button class="topbar-menu-btn" onclick="toggleMenu()">
+                <span class="hamburger"><span></span><span></span><span></span></span>
+            </button>
+        </div>
+    </header>
+
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+    <nav class="slide-menu" id="slideMenu">
+        <button class="menu-close" onclick="toggleMenu()">&#x2715;</button>
+        <div class="menu-section-label">メニュー</div>
+        <a href="index.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="1" width="6" height="6" rx="1" fill="currentColor" />
+                <rect x="9" y="1" width="6" height="6" rx="1" fill="currentColor" />
+                <rect x="1" y="9" width="6" height="6" rx="1" fill="currentColor" />
+                <rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor" />
+            </svg>ダッシュボード</a>
+        <a href="search.html" class="menu-item active"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5" />
+                <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>検索</a>
+        <a href="check.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>チェック</a>
+        <a href="sales.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M2 13l4-4 3 3 5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>営業</a>
+        <a href="inbox.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                <path d="M1 5l7 5 7-5" stroke="currentColor" stroke-width="1.5" />
+            </svg>受信トレイ</a>
+        <a href="log.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M2 4h12M2 8h8M2 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>ログ</a>
+    </nav>
+
+    <main class="main" style="padding-bottom:80px;">
+        <!-- 検索フォーム -->
+        <div class="card animate-in">
+            <div class="card-header">
+                <span class="card-title"><svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                        <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                    </svg>リード検索</span>
+            </div>
+            <div class="search-row">
+                <div class="form-group">
+                    <label class="form-label">地名</label>
+                    <input type="text" class="form-input" placeholder="古賀市、久留米市..." id="searchArea">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">業種</label>
+                    <select class="form-select" id="searchType">
+                        <option value="">すべて</option>
+                        <option value="interior">内装工事</option>
+                        <option value="exterior">外壁塗装</option>
+                        <option value="plumbing">水回り工事</option>
+                        <option value="electric">電気工事</option>
+                        <option value="sash">サッシ・ガラス</option>
+                        <option value="landscape">外構・エクステリア</option>
+                        <option value="joinery">建具・ドア</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">&nbsp;</label>
+                    <button class="btn btn-primary" onclick="handleSearch()">
+                        <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                            <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5" />
+                            <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" />
+                        </svg>
+                        検索
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 検索ログ -->
+        <div class="card animate-in" style="margin-top:var(--s4);">
+            <div class="card-header">
+                <span class="card-title"><svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                        <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                    </svg>検索ログ</span>
+                <span class="t-muted" style="font-size:.7rem;">直近10件</span>
+            </div>
+            <table class="log-tbl">
+                <thead>
+                    <tr>
+                        <th>検索条件</th>
+                        <th>取得</th>
+                        <th>保存</th>
+                        <th>日時</th>
+                    </tr>
+                </thead>
+                <tbody id="logTbody">
+                    <tr>
+                        <td class="log-query">古賀市 / 内装工事</td>
+                        <td>18件</td>
+                        <td class="t-green fw-700">12件</td>
+                        <td>3/19 15:30</td>
+                    </tr>
+                    <tr>
+                        <td class="log-query">久留米市 / 外壁塗装</td>
+                        <td>24件</td>
+                        <td class="t-green fw-700">18件</td>
+                        <td>3/18 14:00</td>
+                    </tr>
+                    <tr>
+                        <td class="log-query">福岡市南区 / リフォーム</td>
+                        <td>42件</td>
+                        <td class="t-green fw-700">30件</td>
+                        <td>3/17 11:20</td>
+                    </tr>
+                    <tr>
+                        <td class="log-query">春日市 / 水回り工事</td>
+                        <td>9件</td>
+                        <td class="t-green fw-700">7件</td>
+                        <td>3/16 16:45</td>
+                    </tr>
+                    <tr>
+                        <td class="log-query">太宰府市 / 屋根工事</td>
+                        <td>6件</td>
+                        <td class="t-yellow fw-700">3件</td>
+                        <td>3/15 10:00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 検索結果 -->
+        <div class="results-area animate-in" id="resultsArea" style="display:none;">
+            <div class="results-header">
+                <h2 style="font-size:1rem;font-weight:700;">検索結果</h2>
+                <span class="results-count" id="resultsCount">—</span>
+            </div>
+            <div class="results-grid" id="resultsGrid">
+                <!-- 動的に挿入 -->
+            </div>
+        </div>
+    </main>
+
+    <!-- 一括保存バー -->
+    <div class="batch-bar" id="batchBar">
+        <span class="batch-label"><span class="batch-count" id="selectedCount">0</span> 件選択中</span>
+        <button class="btn btn-primary btn-sm" onclick="saveSelected()">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8l4 4 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+            スプシに保存
+        </button>
+    </div>
+
+    <script>
+        // ── 定数 ──────────────────────────────────────────────────────────
+
+        const PLACES_ENDPOINT = 'https://places.googleapis.com/v1/places:searchText';
+
+        function toggleMenu() {
+            document.getElementById('slideMenu').classList.toggle('active');
+            document.getElementById('menuOverlay').classList.toggle('active');
+        }
+
+        const INDUSTRY_LABELS = {
+            'interior': '内装', 'plumbing': '水回り', 'electric': '電気',
+            'sash': 'サッシ・ガラス', 'exterior': '外壁・屋根', 'landscape': '外構', 'joinery': '建具'
+        };
+
+        // ── Places API 検索（フロントから直接） ──────────────────────────────
+        const KEYWORDS = {
+            'interior': ['内装工事', 'クロス張替え', '床張替え', '壁紙', '間仕切り'],
+            'plumbing': ['水回りリフォーム', 'トイレ修理', '水漏れ', 'キッチン交換', '浴室リフォーム'],
+            'electric': ['電気工事', 'エアコン取り付け', 'コンセント増設'],
+            'sash': ['ガラス修理', '窓交換', 'サッシ交換'],
+            'exterior': ['外壁塗装', '屋根修理', '雨漏り修理', '防水工事'],
+            'landscape': ['外構工事', 'カーポート', 'ウッドデッキ'],
+            'joinery': ['建具', 'ドア交換', '引き戸修理', '玄関ドア'],
+        };
+
+        function _priorityScore(p) {
+            let s = 0;
+            if ((p.photo_count || 0) <= 3) s += 3;
+            else if ((p.photo_count || 0) <= 6) s += 1;
+            if (!p.has_hours) s += 2;
+            if ((p.review_count || 0) <= 5) s += 2;
+            if (!p.website) s += 2;
+            if (!p.rating || p.rating <= 3.5) s += 1;
+            return s;
+        }
+
+        function _tabFor(website) {
+            if (!website) return 'none';
+            if (/instagram|facebook|twitter|x\.com|line\.me/i.test(website)) return 'sns';
+            return 'hp';
+        }
+
+        async function _placesSearch(query) {
+            const res = await fetch(PLACES_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Goog-Api-Key': CONFIG.PLACES_API_KEY,
+                    'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.photos,places.regularOpeningHours',
+                },
+                body: JSON.stringify({ textQuery: query, languageCode: 'ja', maxResultCount: 20 }),
+            });
+            if (!res.ok) throw new Error('Places API: ' + res.status);
+            const data = await res.json();
+            return (data.places || []).map(p => ({
+                id: p.id,
+                name: p.displayName?.text || '',
+                address: p.formattedAddress || '',
+                phone: p.nationalPhoneNumber || '',
+                website: p.websiteUri || '',
+                rating: p.rating || null,
+                review_count: p.userRatingCount || 0,
+                photo_count: (p.photos || []).length,
+                has_hours: !!(p.regularOpeningHours),
+                tab: _tabFor(p.websiteUri),
+                priority_score: _priorityScore({
+                    photo_count: (p.photos || []).length,
+                    has_hours: !!(p.regularOpeningHours),
+                    review_count: p.userRatingCount || 0,
+                    website: p.websiteUri,
+                    rating: p.rating,
+                }),
+                photo_refs: (p.photos || []).slice(0, 10).map(ph => ph.name),
+            }));
+        }
+
+        async function _saveToSheets(companies, keyword) {
+            const now = new Date().toISOString();
+            for (const c of companies) {
+                const sheetName = c.tab === 'hp' ? CONFIG.SHEETS.UNCHECKED_HP
+                    : c.tab === 'sns' ? CONFIG.SHEETS.UNCHECKED_SNS
+                        : CONFIG.SHEETS.UNCHECKED_NONE;
+                const row = [
+                    c.id, c.name, c.address, c.phone, c.website,
+                    '', // GBP URL（後で）
+                    c.rating, c.review_count,
+                    (c.photo_refs || []).join('|'), // I列: 写真参照ID（デーモンがDL後フォルダURLに上書き）
+                    c.photo_count, c.has_hours ? '有' : '無',
+                    '', '', // 業種タイプ、説明文
+                    c.tab, '', '', // SSL, モバイル, 老朽化（デーモンが記入）
+                    '', '', '', '', // メアド, フォームURL, お断り, CAPTCHA
+                    '', '', '', // 写真チェック, スクショ①②
+                    '', c.priority_score, '', // 弱点タグ, スコア, 営業文
+                    '', '', '', '', // 担当者, 送信方法, ステータス, 日時
+                    now, '', '', // 取得日, 返信ステータス, 口コミ返信
+                    keyword,
+                ];
+                try {
+                    await Sheets.append(sheetName, row);
+                } catch (e) {
+                    console.error('Sheets書き込みエラー:', c.name, e);
+                }
+            }
+        }
+
+        async function handleSearch() {
+            const area = document.getElementById('searchArea').value.trim();
+            const industry = document.getElementById('searchType').value;
+            if (!area) { document.getElementById('searchArea').style.borderColor = 'var(--red)'; return; }
+            document.getElementById('searchArea').style.borderColor = '';
+
+            const btn = document.querySelector('[onclick="handleSearch()"]');
+            btn.disabled = true;
+            btn.textContent = '検索中...';
+
+            const grid = document.getElementById('resultsGrid');
+            grid.innerHTML = '<div style="color:var(--text-muted);padding:24px;text-align:center;">読み込み中...</div>';
+            document.getElementById('resultsArea').style.display = 'block';
+            document.getElementById('resultsArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            try {
+                // 消費者ワードを展開して並列検索
+                const kws = KEYWORDS[industry] || [industry];
+                const allResults = await Promise.all(
+                    kws.map(kw => _placesSearch(`${area} ${kw}`).catch(() => []))
+                );
+                // 重複除去（place_id）
+                const seen = new Set();
+                const companies = allResults.flat().filter(c => {
+                    if (seen.has(c.id)) return false;
+                    seen.add(c.id);
+                    return true;
+                });
+
+                // Sheetsに書き込み（非同期、UIはブロックしない）
+                const keyword = (KEYWORDS[industry] || [industry])[0];
+                _saveToSheets(companies, keyword).catch(e => console.error('Sheets書き込み失敗:', e));
+
+                renderResults(companies, area, INDUSTRY_LABELS[industry] || industry);
+
+                // ログ行追加
+                const now = new Date();
+                const ts = (now.getMonth() + 1) + '/' + now.getDate() + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+                const tbody = document.getElementById('logTbody');
+                const row = document.createElement('tr');
+                row.innerHTML = `<td class="log-query">${area} / ${INDUSTRY_LABELS[industry] || industry}</td><td>${companies.length}件</td><td class="t-green fw-700">${companies.length}件</td><td>${ts}</td>`;
+                tbody.insertBefore(row, tbody.firstChild);
+            } catch (e) {
+                console.error('検索エラー:', e);
+                grid.innerHTML = `<div style="color:var(--red);padding:24px;">検索エラー: ${e.message}<br><small>Places APIキーまたは権限を確認してください</small></div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '検索';
+            }
+        }
+
+        const SCORE_CLASS = { bad: 'bad', warn: 'warn', good: 'ok' };
+
+        function priorityBadge(score) {
+            if (score >= 8) return `<span style="background:var(--green);color:#000;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:20px;">HIGH ${score}pt</span>`;
+            if (score >= 4) return `<span style="background:var(--yellow);color:#000;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:20px;">MED ${score}pt</span>`;
+            return `<span style="background:var(--text-muted);color:#fff;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:20px;">LOW ${score}pt</span>`;
+        }
+
+        function gbpUrl(name, address) {
+            const q = encodeURIComponent((name || '') + ' ' + (address || ''));
+            return `https://www.google.com/search?q=${q}&udm=1`;
+        }
+
+        function renderResults(companies, area, industryLabel) {
+            const grid = document.getElementById('resultsGrid');
+            document.getElementById('resultsCount').textContent = companies.length + '件';
+            if (companies.length === 0) {
+                grid.innerHTML = '<div style="color:var(--text-muted);padding:24px;text-align:center;">結果がありませんでした</div>';
+                return;
+            }
+            // スコア高い順に並べる
+            companies.sort((a, b) => (b.priority_score || 0) - (a.priority_score || 0));
+            grid.innerHTML = companies.map((c) => {
+                const d = c.diagnostics || {};
+                const rating = c.rating ? `★ ${c.rating.toFixed(1)} <span>(${c.review_count || 0})</span>` : '★ —';
+                const photoTag = `<span class="diag-tag ${SCORE_CLASS[d.photo_score] || ''}">写真 ${c.photo_count || 0}枚</span>`;
+                const hoursTag = `<span class="diag-tag ${SCORE_CLASS[d.hours_score] || ''}">営業時間${c.has_hours ? 'あり' : '未設定'}</span>`;
+                const ratingTag = `<span class="diag-tag ${SCORE_CLASS[d.rating_score] || ''}">評価${c.rating ? c.rating.toFixed(1) : '—'}</span>`;
+                const webTag = c.website ? `<span class="diag-tag ok">HP${c.website_type === 'sns' ? ' (SNS)' : ''}</span>` : `<span class="diag-tag bad">HPなし</span>`;
+                const badge = priorityBadge(c.priority_score || 0);
+                return `
+                <div class="result-card" data-id="${c.id}" id="card-${c.id}">
+                    <div class="result-top">
+                        <div style="flex:1;min-width:0;">
+                            <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                                ${badge}
+                            </div>
+                            <div class="result-name">${c.name}</div>
+                            <div class="result-location">${c.address || ''}</div>
+                        </div>
+                        <div class="result-rating">${rating}</div>
+                    </div>
+                    <div class="diag-row">${photoTag}${ratingTag}${hoursTag}${webTag}</div>
+                    <div style="display:flex;gap:6px;margin-top:10px;">
+                        <button class="btn btn-success" style="flex:2;padding:8px 0;font-size:.78rem;"
+                            onclick="promoteCard('${c.id}', this)">
+                            ✓ チェックへ
+                        </button>
+                        <a href="${gbpUrl(c.name, c.address)}" target="_blank" rel="noopener"
+                            class="btn" style="flex:1.5;padding:8px 0;font-size:.78rem;text-align:center;
+                            color:var(--blue-accent);border:1px solid var(--blue-accent);text-decoration:none;">
+                            GBP確認
+                        </a>
+                        <button class="btn" style="flex:1;padding:8px 0;font-size:.78rem;
+                            color:var(--red);border:1px solid var(--red);"
+                            onclick="rejectCard('${c.id}', this)">
+                            × 却下
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function promoteCard(cid, btn) {
+            // 検索結果からデータ取得してチェック済みシートへ移動（将来実装）
+            btn.disabled = true;
+            btn.textContent = '✓ チェック済み';
+            const card = document.getElementById('card-' + cid);
+            if (card) {
+                card.style.opacity = '.3';
+                card.style.pointerEvents = 'none';
+            }
+        }
+
+        async function rejectCard(cid, btn) {
+            btn.disabled = true;
+            const card = document.getElementById('card-' + cid);
+            if (card) card.remove();
+            const remaining = document.querySelectorAll('.result-card').length;
+            document.getElementById('resultsCount').textContent = remaining + '件';
+        }
+    </script>
+    <script>
+        window.onerror = function (msg, src, line, col, err) {
+            var m = '⚠️ [エラー] ' + msg + (src ? ' (' + src.split('/').pop() + ':' + line + ')' : '');
+            if (typeof showToast === 'function') { showToast(m); return false; }
+            var t = document.createElement('div');
+            t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#ef4444;color:#fff;padding:10px 18px;border-radius:8px;font-size:.8125rem;font-weight:600;z-index:99999;max-width:90vw;word-break:break-all;box-shadow:0 4px 12px rgba(0,0,0,.3);';
+            t.textContent = m; document.body.appendChild(t);
+            setTimeout(function () { t.remove(); }, 6000);
+            return false;
+        };
+    </script>
+</body>
+
+</html>

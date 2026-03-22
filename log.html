@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLSE — ログ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .date-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--s4);
+        }
+
+        .date-label {
+            font-size: .875rem;
+            font-weight: 700;
+        }
+
+        .date-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--r1);
+            border: 1px solid var(--line-2);
+            background: transparent;
+            color: var(--t-2);
+            cursor: pointer;
+            font-size: .75rem;
+            transition: var(--fast);
+        }
+
+        .date-btn:hover {
+            background: var(--bg-3);
+            color: var(--t-1);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 2px;
+            background: var(--bg-1);
+            border: 1px solid var(--line-1);
+            border-radius: var(--r1);
+            padding: 3px;
+            margin-bottom: var(--s4);
+            width: fit-content;
+        }
+
+        .vtog-btn {
+            padding: 5px 14px;
+            border-radius: 5px;
+            font-size: .75rem;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            color: var(--t-3);
+            cursor: pointer;
+            transition: var(--fast);
+            font-family: var(--sans);
+        }
+
+        .vtog-btn.active {
+            background: var(--bg-3);
+            color: var(--t-1);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 28px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: var(--line-1);
+        }
+
+        .tl-item {
+            position: relative;
+            margin-bottom: var(--s4);
+        }
+
+        .tl-dot {
+            position: absolute;
+            left: -24px;
+            top: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 1.5px solid var(--bg-1);
+            flex-shrink: 0;
+        }
+
+        .tl-dot.blue {
+            background: var(--blue);
+        }
+
+        .tl-dot.green {
+            background: var(--green);
+        }
+
+        .tl-dot.red {
+            background: var(--red);
+        }
+
+        .tl-dot.yellow {
+            background: var(--yellow);
+        }
+
+        .tl-time {
+            font-size: .6875rem;
+            color: var(--t-3);
+            margin-bottom: 2px;
+            font-weight: 600;
+            letter-spacing: .03em;
+        }
+
+        .tl-content {
+            background: var(--bg-2);
+            border: 1px solid var(--line-1);
+            border-radius: var(--r2);
+            padding: var(--s3) var(--s4);
+        }
+
+        .tl-action {
+            font-size: .6875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            margin-bottom: 2px;
+        }
+
+        .tl-name {
+            font-size: .875rem;
+            font-weight: 600;
+        }
+
+        .tl-detail {
+            font-size: .75rem;
+            color: var(--t-3);
+            margin-top: 2px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--s2);
+            margin-bottom: var(--s4);
+        }
+
+        @media(min-width:480px) {
+            .summary-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <span class="topbar-logo">BLSE</span>
+        <div class="topbar-right">
+            <span class="topbar-user">AOKI</span>
+            <button class="topbar-menu-btn" onclick="toggleMenu()">
+                <span class="hamburger"><span></span><span></span><span></span></span>
+            </button>
+        </div>
+    </header>
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+    <nav class="slide-menu" id="slideMenu">
+        <button class="menu-close" onclick="toggleMenu()">&#x2715;</button>
+        <div class="menu-section-label">メニュー</div>
+        <a href="index.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="1" width="6" height="6" rx="1" fill="currentColor" />
+                <rect x="9" y="1" width="6" height="6" rx="1" fill="currentColor" />
+                <rect x="1" y="9" width="6" height="6" rx="1" fill="currentColor" />
+                <rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor" />
+            </svg>ダッシュボード</a>
+        <a href="search.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5" />
+                <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>検索</a>
+        <a href="check.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>チェック</a>
+        <a href="sales.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M2 13l4-4 3 3 5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>営業</a>
+        <a href="inbox.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                <path d="M1 5l7 5 7-5" stroke="currentColor" stroke-width="1.5" />
+            </svg>受信トレイ</a>
+        <a href="log.html" class="menu-item active"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M2 4h12M2 8h8M2 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>ログ</a>
+    </nav>
+
+    <main class="main">
+        <!-- 日付ナビ -->
+        <div class="date-nav animate-in">
+            <button class="date-btn" id="btnPrevDay" onclick="shiftDay(-1)">&#8249;</button>
+            <span class="date-label" id="dateLabel">読み込み中...</span>
+            <button class="date-btn" id="btnNextDay" onclick="shiftDay(1)">&#8250;</button>
+        </div>
+
+        <!-- 表示切り替え -->
+        <div class="view-toggle animate-in">
+            <button class="vtog-btn active" onclick="setView('today', this)">本日</button>
+            <button class="vtog-btn" onclick="setView('week', this)">今週</button>
+            <button class="vtog-btn" onclick="setView('all', this)">全期間</button>
+        </div>
+
+        <!-- サマリー -->
+        <div class="summary-grid animate-in">
+            <div class="stat-item">
+                <div class="stat-value t-blue" id="sumCheck">—</div>
+                <div class="stat-label">チェック件数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" style="color:var(--green)" id="sumSent">—</div>
+                <div class="stat-label">送信数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" style="color:var(--yellow)" id="sumReply">—</div>
+                <div class="stat-label">返信数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" style="color:var(--red)" id="sumSkip">—</div>
+                <div class="stat-label">スキップ</div>
+            </div>
+        </div>
+
+        <!-- タイムライン -->
+        <div class="timeline animate-in" id="tlContainer">
+            <div class="tl-item">
+                <div class="tl-dot blue"></div>
+                <div class="tl-time">読み込み中...</div>
+                <div class="tl-content">
+                    <div class="tl-name" style="color:var(--t-3)">ログを取得しています</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="sheets.js"></script>
+    <script>
+        function toggleMenu() {
+            document.getElementById('slideMenu').classList.toggle('active');
+            document.getElementById('menuOverlay').classList.toggle('active');
+        }
+
+        // ── 状態管理 ─────────────────────────────────────────────────────
+        let _allEvents = [];
+        let _viewMode = 'today';   // 'today' | 'week' | 'all'
+        let _dayOffset = 0;         // 本日=0, 昨日=-1, ...
+
+        // ── 日付ナビ ─────────────────────────────────────────────────────
+        function shiftDay(delta) {
+            _dayOffset += delta;
+            if (_viewMode === 'today') renderTimeline();
+        }
+
+        function setView(mode, btn) {
+            _viewMode = mode;
+            _dayOffset = 0;
+            document.querySelectorAll('.vtog-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderTimeline();
+        }
+
+        function _targetDate() {
+            const d = new Date();
+            d.setDate(d.getDate() + _dayOffset);
+            return d;
+        }
+
+        function _dateLabel() {
+            if (_viewMode === 'all') return '全期間';
+            if (_viewMode === 'week') return '今週';
+            const d = _targetDate();
+            const y = d.getFullYear(), m = d.getMonth() + 1, day = d.getDate();
+            return `${y}年 ${m}月 ${day}日`;
+        }
+
+        // ── カラーマッピング ─────────────────────────────────────────────
+        const ACTION_COLOR = {
+            'メール送信': 'green', '送信': 'green',
+            '返信検知': 'yellow', '返信': 'yellow',
+            'チェック': 'blue', '検索': 'blue', '操作': 'blue',
+            'スキップ': 'red', 'エラー': 'red',
+        };
+        function _dotColor(action) {
+            for (const [key, color] of Object.entries(ACTION_COLOR)) {
+                if (action.includes(key)) return color;
+            }
+            return 'blue';
+        }
+        const DOT_TEXT_MAP = { green: 't-green', yellow: 't-yellow', red: 't-red', blue: 't-blue' };
+
+        // ── フィルタリング ────────────────────────────────────────────────
+        function _filterEvents(events) {
+            if (_viewMode === 'all') return events;
+            const target = _targetDate();
+            const startOfDay = new Date(target.getFullYear(), target.getMonth(), target.getDate());
+            const endOfDay = new Date(startOfDay.getTime() + 86400000);
+            if (_viewMode === 'today') {
+                return events.filter(e => e.date >= startOfDay && e.date < endOfDay);
+            }
+            // week: 月曜起点
+            const dow = target.getDay();
+            const startOfWeek = new Date(startOfDay.getTime() - (dow === 0 ? 6 : dow - 1) * 86400000);
+            const endOfWeek = new Date(startOfWeek.getTime() + 7 * 86400000);
+            return events.filter(e => e.date >= startOfWeek && e.date < endOfWeek);
+        }
+
+        // ── レンダリング ─────────────────────────────────────────────────
+        function renderTimeline() {
+            document.getElementById('dateLabel').textContent = _dateLabel();
+            document.getElementById('btnPrevDay').style.opacity = _viewMode !== 'today' ? '0.3' : '1';
+            document.getElementById('btnPrevDay').disabled = _viewMode !== 'today';
+            document.getElementById('btnNextDay').style.opacity = (_viewMode !== 'today' || _dayOffset >= 0) ? '0.3' : '1';
+            document.getElementById('btnNextDay').disabled = _viewMode !== 'today' || _dayOffset >= 0;
+
+            const filtered = _filterEvents(_allEvents).sort((a, b) => b.date - a.date);
+            const container = document.getElementById('tlContainer');
+
+            // サマリー更新
+            document.getElementById('sumCheck').textContent = filtered.filter(e => e.action.includes('チェック') || e.action.includes('操作')).length;
+            document.getElementById('sumSent').textContent = filtered.filter(e => e.action.includes('送信')).length;
+            document.getElementById('sumReply').textContent = filtered.filter(e => e.action.includes('返信')).length;
+            document.getElementById('sumSkip').textContent = filtered.filter(e => e.action.includes('スキップ') || e.action.includes('エラー')).length;
+
+            if (!filtered.length) {
+                container.innerHTML = `<div class="tl-item"><div class="tl-dot blue"></div><div class="tl-time">—</div><div class="tl-content"><div class="tl-name" style="color:var(--t-3)">この期間のログはありません</div></div></div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(e => {
+                const timeStr = e.date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+                const dateStr = _viewMode !== 'today'
+                    ? e.date.toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' }) + ' ' + timeStr
+                    : timeStr;
+                const color = _dotColor(e.action);
+                const textCls = DOT_TEXT_MAP[color] || 't-blue';
+                return `
+                <div class="tl-item">
+                    <div class="tl-dot ${color}"></div>
+                    <div class="tl-time">${dateStr}</div>
+                    <div class="tl-content">
+                        <div class="tl-action ${textCls}">${e.action}</div>
+                        <div class="tl-name">${e.name}</div>
+                        <div class="tl-detail">${e.detail}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ── データ読み込み ────────────────────────────────────────────────
+        async function loadLogs() {
+            const events = [];
+
+            // 1. 操作ログ (ts, 操作者, 操作, 対象, 詳細)
+            try {
+                const opRows = await Sheets.readAll(CONFIG.SHEETS.OP_LOG || '操作ログ');
+                opRows.forEach(r => {
+                    const d = new Date(r[0]);
+                    if (isNaN(d)) return;
+                    events.push({ date: d, action: r[2] || '操作', name: r[3] || '', detail: r[4] || '' });
+                });
+            } catch (e) { console.warn('操作ログ取得失敗:', e); }
+
+            // 2. 返信ログ (ts, 差出人, 件名, 本文冠頭, カテゴリ, 会社名, 対応ステータス)
+            try {
+                const replyRows = await Sheets.readAll('返信ログ');
+                replyRows.forEach(r => {
+                    const d = new Date(r[0]);
+                    if (isNaN(d)) return;
+                    events.push({ date: d, action: '返信検知', name: r[5] || r[1] || '', detail: `カテゴリ: ${r[4] || '—'} · ${r[6] || '未対応'}` });
+                });
+            } catch (e) { console.warn('返信ログ取得失敗:', e); }
+
+            // 3. 送信済み (ts, to, subject, company, method)
+            try {
+                const sentRows = await Sheets.readAll(CONFIG.SHEETS.SENT || '送信済み');
+                sentRows.forEach(r => {
+                    const d = new Date(r[0]);
+                    if (isNaN(d)) return;
+                    events.push({ date: d, action: 'メール送信', name: r[3] || r[1] || '', detail: r[2] || '' });
+                });
+            } catch (e) { console.warn('送信済み取得失敗:', e); }
+
+            _allEvents = events;
+            renderTimeline();
+        }
+
+        loadLogs();
+    </script>
+    <script>
+        window.onerror = function (msg, src, line, col, err) {
+            var m = '⚠️ [エラー] ' + msg + (src ? ' (' + src.split('/').pop() + ':' + line + ')' : '');
+            if (typeof showToast === 'function') { showToast(m); return false; }
+            var t = document.createElement('div');
+            t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#ef4444;color:#fff;padding:10px 18px;border-radius:8px;font-size:.8125rem;font-weight:600;z-index:99999;max-width:90vw;word-break:break-all;box-shadow:0 4px 12px rgba(0,0,0,.3);';
+            t.textContent = m; document.body.appendChild(t);
+            setTimeout(function () { t.remove(); }, 6000);
+            return false;
+        };
+    </script>
+</body>
+
+</html>

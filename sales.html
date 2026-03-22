@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLSE — 営業</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--line-1);
+            margin-bottom: var(--s5);
+        }
+
+        .tab-btn {
+            padding: 10px var(--s4);
+            font-size: .8125rem;
+            font-weight: 600;
+            background: transparent;
+            border: none;
+            color: var(--t-3);
+            cursor: pointer;
+            position: relative;
+            font-family: var(--sans);
+            border-bottom: 2px solid transparent;
+            transition: var(--fast);
+            margin-bottom: -1px;
+        }
+
+        .tab-btn:hover {
+            color: var(--t-1);
+        }
+
+        .tab-btn.active {
+            color: var(--t-1);
+            border-bottom-color: var(--blue);
+        }
+
+        .tab-badge {
+            display: inline-block;
+            padding: 1px 7px;
+            border-radius: 100px;
+            font-size: .625rem;
+            font-weight: 700;
+            background: var(--bg-3);
+            color: var(--t-2);
+            margin-left: 6px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .sales-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--s2);
+            margin-bottom: var(--s5);
+        }
+
+        .co-card {
+            background: var(--bg-1);
+            border: 1px solid var(--line-1);
+            border-radius: var(--r2);
+            margin-bottom: var(--s3);
+            overflow: hidden;
+            transition: var(--mid);
+        }
+
+        .co-card:hover {
+            border-color: var(--line-2);
+        }
+
+        .co-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--s3) var(--s4);
+            cursor: pointer;
+        }
+
+        .co-name {
+            font-size: .9375rem;
+            font-weight: 700;
+        }
+
+        .co-sub {
+            font-size: .75rem;
+            color: var(--t-3);
+            margin-top: 1px;
+        }
+
+        .co-status {
+            display: flex;
+            align-items: center;
+            gap: var(--s2);
+        }
+
+        .co-body {
+            padding: 0 var(--s4) var(--s4);
+            border-top: 1px solid var(--line-1);
+            display: none;
+        }
+
+        .co-card.open .co-body {
+            display: block;
+        }
+
+        .co-body-inner {
+            padding-top: var(--s3);
+        }
+
+        .image-area {
+            margin-bottom: var(--s4);
+        }
+
+        .image-section-lbl {
+            font-size: .625rem;
+            font-weight: 700;
+            color: var(--t-3);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            margin-bottom: var(--s2);
+        }
+
+        .image-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--s2);
+        }
+
+        .image-slot {
+            background: var(--bg-0);
+            border: 1px dashed var(--line-2);
+            border-radius: var(--r1);
+            padding: var(--s3);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .image-slot-lbl {
+            font-size: .625rem;
+            font-weight: 700;
+            color: var(--t-3);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .image-slot-file {
+            font-size: .75rem;
+            color: var(--t-2);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .co-actions {
+            display: flex;
+            gap: var(--s2);
+            flex-wrap: wrap;
+        }
+
+        .batch-action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-1);
+            border-top: 1px solid var(--line-2);
+            padding: var(--s3) var(--s4);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--s3);
+            z-index: 500;
+        }
+
+        .bar-label {
+            font-size: .8125rem;
+            font-weight: 600;
+            color: var(--t-2);
+        }
+
+        .bar-btns {
+            display: flex;
+            gap: var(--s2);
+        }
+
+        .sent-badge {
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-size: .6875rem;
+            font-weight: 700;
+            background: var(--green-dim);
+            color: var(--green);
+        }
+
+        .pending-badge {
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-size: .6875rem;
+            font-weight: 700;
+            background: var(--yellow-dim);
+            color: var(--yellow);
+        }
+
+        .ready-badge {
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-size: .6875rem;
+            font-weight: 700;
+            background: var(--blue-dim);
+            color: var(--blue);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <span class="topbar-logo">BLSE</span>
+        <div class="topbar-right">
+            <span class="topbar-user">AOKI</span>
+            <button class="topbar-menu-btn" onclick="toggleMenu()">
+                <span class="hamburger"><span></span><span></span><span></span></span>
+            </button>
+        </div>
+    </header>
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+    <nav class="slide-menu" id="slideMenu">
+        <button class="menu-close" onclick="toggleMenu()">&#x2715;</button>
+        <div class="menu-section-label">メニュー</div>
+        <a href="index.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="1" width="6" height="6" rx="1" fill="currentColor" />
+                <rect x="9" y="1" width="6" height="6" rx="1" fill="currentColor" />
+                <rect x="1" y="9" width="6" height="6" rx="1" fill="currentColor" />
+                <rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor" />
+            </svg>ダッシュボード</a>
+        <a href="search.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5" />
+                <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>検索</a>
+        <a href="check.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>チェック</a>
+        <a href="sales.html" class="menu-item active"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M2 13l4-4 3 3 5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>営業</a>
+        <a href="inbox.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                <path d="M1 5l7 5 7-5" stroke="currentColor" stroke-width="1.5" />
+            </svg>受信トレイ</a>
+        <a href="log.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M2 4h12M2 8h8M2 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>ログ</a>
+    </nav>
+
+    <main class="main" style="padding-bottom:80px;">
+        <!-- 統計 -->
+        <div class="sales-stats animate-in">
+            <div class="stat-item">
+                <div class="stat-value t-blue">12</div>
+                <div class="stat-label">チェック済み</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" style="color:var(--yellow)">10</div>
+                <div class="stat-label">下書き準備完了</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" style="color:var(--green)">8</div>
+                <div class="stat-label">送信済み</div>
+            </div>
+        </div>
+
+        <!-- タブ -->
+        <div class="tabs animate-in">
+            <button class="tab-btn active" onclick="switchTab(this,'email')">メール <span
+                    class="tab-badge">10</span></button>
+            <button class="tab-btn" onclick="switchTab(this,'form')">フォーム <span class="tab-badge">2</span></button>
+        </div>
+
+        <!-- メールタブ -->
+        <div class="tab-content active" id="tab-email">
+            <div id="emailList">
+                <div class="t-muted" style="padding:var(--s4);font-size:.8125rem;">読み込み中...</div>
+            </div>
+        </div>
+
+        <!-- フォームタブ -->
+        <div class="tab-content" id="tab-form">
+            <div id="formList">
+                <div class="t-muted" style="padding:var(--s4);font-size:.8125rem;">読み込み中...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 一括操作バー -->
+    <div class="batch-action-bar">
+        <span class="bar-label" id="barLabel">メール: <b style="color:var(--t-1)">—件</b></span>
+        <div class="bar-btns">
+            <button class="btn btn-secondary btn-sm" onclick="genAllDrafts()">一括下書き生成</button>
+            <button class="btn btn-primary btn-sm" onclick="sendAll()">一括送信</button>
+        </div>
+    </div>
+
+    <!-- 下書きモーダル -->
+    <div id="draftModal" style="
+        display:none; position:fixed; inset:0; z-index:200;
+        background:rgba(0,0,0,.6); backdrop-filter:blur(4px);
+        align-items:center; justify-content:center; padding:var(--s5);
+    " onclick="closeDraft(event)">
+        <div style="
+            background:var(--bg-2); border:1px solid var(--line-2);
+            border-radius:var(--r3); width:100%; max-width:520px;
+            box-shadow:var(--sh2); padding:var(--s5);
+        " onclick="event.stopPropagation()">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s4);">
+                <div>
+                    <div style="font-size:.6875rem;color:var(--t-3);margin-bottom:2px;">下書きプレビュー</div>
+                    <div id="draftCoName" style="font-size:.9375rem;font-weight:700;color:var(--t-1);"></div>
+                </div>
+                <button onclick="closeDraft()"
+                    style="background:none;border:none;color:var(--t-3);cursor:pointer;font-size:1.2rem;">✕</button>
+            </div>
+            <div style="margin-bottom:var(--s3);">
+                <div style="font-size:.6875rem;color:var(--t-3);margin-bottom:4px;">件名</div>
+                <div id="draftSubject" style="
+                    background:var(--bg-1);border:1px solid var(--line-2);
+                    border-radius:var(--r1);padding:8px 12px;
+                    font-size:.8125rem;color:var(--t-1);
+                "></div>
+            </div>
+            <div>
+                <div style="font-size:.6875rem;color:var(--t-3);margin-bottom:4px;">本文</div>
+                <textarea id="draftBody" style="
+                    width:100%;height:260px;resize:vertical;
+                    background:var(--bg-1);border:1px solid var(--line-2);
+                    border-radius:var(--r1);padding:10px 12px;
+                    font-size:.8125rem;color:var(--t-1);line-height:1.7;
+                    font-family:var(--sans);
+                "></textarea>
+            </div>
+            <div style="display:flex;gap:var(--s2);margin-top:var(--s4);justify-content:flex-end;">
+                <button class="btn btn-ghost btn-sm" onclick="closeDraft()">閉じる</button>
+                <button class="btn btn-primary btn-sm" onclick="sendDraft()">このまま送信</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="sheets.js"></script>
+    <script>
+        // ── カラムインデックス（仕様書 35列定義準拠、0始まり） ──
+        const COL = {
+            PLACE_ID: 0, NAME: 1, ADDRESS: 2, PHONE: 3, HP: 4, GBP: 5,
+            RATING: 6, REVIEWS: 7, DRIVE_FOLDER: 8, PHOTOS: 9,
+            HOURS: 10, STATUS: 11, TYPE: 12, DESC: 13, TAB: 14,
+            SSL: 15, MOBILE: 16, OLD: 17, EMAIL: 18, FORM_URL: 19,
+            REFUSE: 20, CAPTCHA: 21, PHOTO_CHECK: 22,
+            SCREENSHOT1: 23, SCREENSHOT2: 24, WEAK_TAGS: 25,
+            SCORE: 26, DRAFT: 27, OWNER: 28, SEND_METHOD: 29,
+            SEND_STATUS: 30, SEND_DATE: 31, FETCH_DATE: 32,
+            REPLY_STATUS: 33, REVIEW_REPLY: 34,
+        };
+
+        let _emailRows = [];
+        let _formRows = [];
+        let _draftCtx = { rowIndex: null, toEmail: null, coName: null, sheetName: null };
+
+        function toggleMenu() {
+            document.getElementById('slideMenu').classList.toggle('active');
+            document.getElementById('menuOverlay').classList.toggle('active');
+        }
+        function switchTab(btn, id) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-' + id).classList.add('active');
+            const label = document.getElementById('barLabel');
+            if (id === 'email') label.innerHTML = `メール: <b style="color:var(--t-1)">${_emailRows.length}件</b>`;
+            else label.innerHTML = `フォーム: <b style="color:var(--t-1)">${_formRows.length}件</b>`;
+        }
+        function toggleCoCard(header) {
+            header.closest('.co-card').classList.toggle('open');
+        }
+
+        // ── 営業文生成 ──
+        function buildDraftText(coName, r) {
+            const rating = parseFloat(r[COL.RATING]) || 0;
+            const photos = parseInt(r[COL.PHOTOS]) || 0;
+            const weakTags = (r[COL.WEAK_TAGS] || '').split(',').map(s => s.trim()).filter(Boolean);
+            const issues = [];
+
+            if (photos <= 3) issues.push(`現在お写真が${photos}枚と少ない状態です。10枚以上掲載で検索表示率が大幅に改善されます。`);
+            else if (photos <= 6) issues.push(`写真をもう少し増やすことでお客様への訴求力が高まります。`);
+            if (weakTags.includes('投稿ゼロ')) issues.push(`投稿機能がまだご活用いただけていません。月2〜3件の投稿で上位表示への効果が期待できます。`);
+            if (weakTags.includes('営業時間未設定')) issues.push(`営業時間が未設定のため、検索ユーザーに不安を与えている可能性があります。`);
+            if (rating > 0 && rating < 3.5) issues.push(`現在の評価（★${rating}）改善のために、口コミへの丁寧な返信が有効です。`);
+            if (!issues.length) issues.push(`Googleビジネスプロフィールをより効果的にご活用いただけるご提案があります。`);
+
+            return [
+                `${coName} ご担当者様`, ``,
+                `はじめてご連絡いたします。Blue Lifeの青木と申します。`,
+                `Googleビジネスプロフィールの改善支援を行っており、貴社のアカウントを拝見してご連絡しました。`, ``,
+                `【現状の課題】`,
+                ...issues.map(i => `・${i}`), ``,
+                `これらを改善することで、Googleマップからの集客を大幅に強化できます。`,
+                `まずは無料でご相談を承っておりますので、お気軽にご連絡ください。`, ``,
+                `どうぞよろしくお願いいたします。`,
+                `Blue Life　青木`,
+            ].join('\n');
+        }
+
+        // ── カード描画 ──
+        function renderEmailCard(r, idx) {
+            const coName = r[COL.NAME] || '（店名なし）';
+            const rating = r[COL.RATING] || '—';
+            const email = r[COL.EMAIL] || '';
+            const gbpUrl = r[COL.GBP] || 'https://business.google.com';
+            const driveFolderUrl = r[COL.DRIVE_FOLDER] || '';
+            const hasDrive = driveFolderUrl.startsWith('https://');
+            const sent = (r[COL.SEND_STATUS] || '').includes('送信済');
+            const badge = sent
+                ? `<span class="sent-badge">送信済み</span>`
+                : `<span class="ready-badge">未送信</span>`;
+
+            return `<div class="co-card" data-idx="${idx}">
+                <div class="co-header" onclick="toggleCoCard(this)">
+                    <div>
+                        <div class="co-name">${coName}</div>
+                        <div class="co-sub">★ ${rating} · ${email}</div>
+                    </div>
+                    <div class="co-status">
+                        ${badge}
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                            <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="co-body">
+                    <div class="co-body-inner">
+                        <div style="margin-bottom:var(--s3);display:flex;align-items:center;gap:var(--s2);">
+                            <span style="font-size:.6875rem;color:var(--t-3);">GBP:</span>
+                            <a href="${gbpUrl}" target="_blank" style="font-size:.75rem;color:var(--blue);">Googleマップで開く ↗</a>
+                            ${hasDrive ? `<a href="${driveFolderUrl}" target="_blank" style="font-size:.75rem;color:var(--blue);">📁 Drive写真 ↗</a>` : '<span style="font-size:.6875rem;color:var(--t-4);">写真DL待ち</span>'}
+                        </div>
+                        <!-- 選択中のレポート画像 -->
+                        <div id="img-preview-${idx}" style="display:none;margin-bottom:var(--s3);">
+                            <div style="font-size:.6875rem;color:var(--t-3);margin-bottom:4px;">選択中の画像:</div>
+                            <div id="img-thumbs-${idx}" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+                        </div>
+                        <div class="co-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="openDraft(${idx})">下書き生成</button>
+                            ${hasDrive ? `<button class="btn btn-sm" style="border:1px solid var(--t-3);color:var(--t-2);padding:5px 12px;font-size:.75rem;"
+                                onclick="openDriveFolderModal(${idx})" id="btn-drive-${idx}">📂 画像を選択</button>` : ''}
+                            <label class="btn btn-sm" style="cursor:pointer;border:1px solid var(--line-2);padding:5px 12px;font-size:.75rem;"
+                                title="スマホのカメラロールからスクショを選択してDriveにアップロード">
+                                📤 スクショ追加
+                                <input type="file" accept="image/*" style="display:none" onchange="uploadScreenshot(${idx}, this)">
+                            </label>
+                            <button class="btn btn-sm" style="border:1px solid var(--t-3);color:var(--t-2);padding:5px 12px;font-size:.75rem;"
+                                onclick="previewReport(${idx})" id="btn-preview-${idx}">
+                                👁 プレビュー
+                            </button>
+                            <button class="btn btn-sm" style="border:1px solid var(--t-4);color:var(--t-3);padding:5px 12px;font-size:.75rem;"
+                                onclick="savePdfAndLink(${idx})" id="btn-pdf-${idx}">
+                                📄 PDF保存
+                            </button>
+                            <button class="btn btn-sm" style="border:1px solid var(--blue);color:var(--blue);padding:5px 12px;font-size:.75rem;"
+                                onclick="generateAndSendEmail(${idx})" id="btn-email-send-${idx}">
+                                📤 メールGO
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderFormCard(r, idx) {
+            const coName = r[COL.NAME] || '（店名なし）';
+            const rating = r[COL.RATING] || '—';
+            const formUrl = r[COL.FORM_URL] || '';
+            const gbpUrl = r[COL.GBP] || 'https://business.google.com';
+            const salesText = r[COL.DRAFT] || '';
+            return `<div class="co-card" data-idx="${idx}">
+                <div class="co-header" onclick="toggleCoCard(this)">
+                    <div>
+                        <div class="co-name">${coName}</div>
+                        <div class="co-sub">★ ${rating} · ${formUrl.replace(/^https?:\/\/[^\/]+/, '').substring(0, 40) || formUrl}</div>
+                    </div>
+                    <div class="co-status">
+                        <span class="ready-badge" id="form-badge-${idx}">未送信</span>
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                            <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="co-body">
+                    <div class="co-body-inner">
+                        <div style="margin-bottom:var(--s3);display:flex;align-items:center;gap:var(--s2);">
+                            <span style="font-size:.6875rem;color:var(--t-3);">フォームURL:</span>
+                            <a href="${formUrl}" target="_blank" style="font-size:.75rem;color:var(--blue);word-break:break-all;">${formUrl}</a>
+                        </div>
+                        <div style="margin-bottom:var(--s3);">
+                            <div style="font-size:.6875rem;color:var(--t-3);margin-bottom:4px;">営業文:</div>
+                            <div style="font-size:.75rem;color:var(--t-2);white-space:pre-line;background:var(--bg-3);padding:8px;border-radius:var(--r1);max-height:80px;overflow:auto;">${salesText || '（買務文未生成）'}</div>
+                        </div>
+                        <div class="co-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="openFormDraft(${idx})">&#9998; テキスト編集</button>
+                            <button class="btn btn-sm" id="btn-form-send-${idx}"
+                                style="background:var(--accent);color:#000;"
+                                onclick="sendFormItem(${idx})">📋 フォームGO</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // ── 読み込み ──
+        async function loadSales() {
+            try {
+                const [emailRows, formRows] = await Promise.all([
+                    Sheets.readAll(CONFIG.SHEETS.CHECKED_EMAIL),
+                    Sheets.readAll(CONFIG.SHEETS.CHECKED_FORM),
+                ]);
+                _emailRows = emailRows;
+                _formRows = formRows;
+
+                // 統計更新
+                const stats = document.querySelectorAll('.stat-item .stat-value');
+                const emailCount = emailRows.length;
+                const formCount = formRows.length;
+                const sentCount = emailRows.filter(r => (r[COL.SEND_STATUS] || '').includes('送信済')).length;
+                if (stats[0]) stats[0].textContent = emailCount + formCount;
+                if (stats[1]) stats[1].textContent = emailCount + formCount - sentCount;
+                if (stats[2]) stats[2].textContent = sentCount;
+
+                // タブバッジ更新
+                const tabBtns = document.querySelectorAll('.tab-badge');
+                if (tabBtns[0]) tabBtns[0].textContent = emailCount;
+                if (tabBtns[1]) tabBtns[1].textContent = formCount;
+
+                // カード描画
+                document.getElementById('emailList').innerHTML = emailRows.length
+                    ? emailRows.map((r, i) => renderEmailCard(r, i)).join('')
+                    : '<div class="t-muted" style="padding:var(--s4);font-size:.8125rem;">チェック済み（メール）件がありません</div>';
+                document.getElementById('formList').innerHTML = formRows.length
+                    ? formRows.map((r, i) => renderFormCard(r, i)).join('')
+                    : '<div class="t-muted" style="padding:var(--s4);font-size:.8125rem;">チェック済み（フォーム）件がありません</div>';
+
+                document.getElementById('barLabel').innerHTML = `メール: <b style="color:var(--t-1)">${emailCount}件</b>`;
+            } catch (e) {
+                console.error('sales読み込み失敗:', e);
+            }
+        }
+
+        function openDraft(idx) {
+            const r = _emailRows[idx];
+            if (!r) return;
+            const coName = r[COL.NAME] || '（店名なし）';
+            const email = r[COL.EMAIL] || '';
+            _draftCtx = { rowIndex: idx + 2, toEmail: email, coName, sheetName: CONFIG.SHEETS.CHECKED_EMAIL };
+            // 既存の営業文があれば使う、なければ生成
+            const existDraft = r[COL.DRAFT] || '';
+            document.getElementById('draftCoName').textContent = coName;
+            document.getElementById('draftSubject').textContent = `【無料】${coName}様のGoogleマップ集客改善についてご提案`;
+            document.getElementById('draftBody').value = existDraft || buildDraftText(coName, r);
+            document.getElementById('draftModal').style.display = 'flex';
+        }
+
+        async function sendDraft() {
+            if (!_draftCtx.toEmail) { showToast('送信先メールアドレスが不明です'); return; }
+            const subject = document.getElementById('draftSubject').textContent;
+            const body = document.getElementById('draftBody').value;
+            const btn = document.querySelector('[onclick="sendDraft()"]');
+            btn.disabled = true; btn.textContent = '送信中...';
+            try {
+                const res = await fetch(CONFIG.GAS_EMAIL_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },  // CORS プリフライト回避
+                    body: JSON.stringify({ secret: CONFIG.GAS_SECRET, action: 'sendEmail', to: _draftCtx.toEmail, subject, body }),
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    showToast(`✅「${_draftCtx.coName}」へ送信完了`);
+                    // 送信済みシートに移動
+                    const r = _emailRows[_draftCtx.rowIndex - 2];
+                    if (r) await Sheets.moveRow(_draftCtx.sheetName, _draftCtx.rowIndex, CONFIG.SHEETS.SENT, r);
+                    document.getElementById('draftModal').style.display = 'none';
+                    await loadSales();
+                } else {
+                    showToast(`❌ 送信失敗: ${data.error || '不明なエラー'}`);
+                }
+            } catch (e) {
+                showToast('❌ 通信エラー: ' + e.message);
+            } finally {
+                btn.disabled = false; btn.textContent = 'このまま送信';
+            }
+        }
+
+        function genAllDrafts() {
+            _emailRows.forEach((_, i) => {
+                const r = _emailRows[i];
+                if (!r[COL.DRAFT]) {
+                    const txt = buildDraftText(r[COL.NAME] || '', r);
+                    // ローカルにキャッシュ（シートへの一括書き込みは次バージョン）
+                    _emailRows[i][COL.DRAFT] = txt;
+                }
+            });
+            showToast(`✅ ${_emailRows.length}件の下書きを生成しました`);
+        }
+
+        // ── レポートプレビュー（gbp_dm_template.htmlをiframeで表示） ──
+        function previewReport(idx) {
+            const r = _emailRows[idx];
+            if (!r) return;
+            const coName = r[COL.NAME] || '（店名なし）';
+            const address = r[COL.ADDRESS] || '';
+            const rating = parseFloat(r[COL.RATING]) || null;
+            const reviewCnt = parseInt(r[COL.REVIEW_COUNT]) || 0;
+            const photoCnt = parseInt(r[COL.PHOTO_COUNT]) || 0;
+            const salesText = r[COL.DRAFT] || buildDraftText(coName, r);
+            const ss1 = r[COL.SCREENSHOT1] || '';
+            const ss2 = r[COL.SCREENSHOT2] || '';
+
+            // スコア算出（photo/口コミ/営業時間の粗スコア）
+            let score = 100;
+            if (photoCnt <= 3) score -= 30; else if (photoCnt <= 6) score -= 15;
+            if (reviewCnt <= 5) score -= 20; else if (reviewCnt <= 20) score -= 5;
+            if (!r[COL.HAS_HOURS] || r[COL.HAS_HOURS] === '') score -= 15;
+            const rank = score >= 80 ? 'A' : score >= 60 ? 'B' : score >= 40 ? 'C' : 'D';
+
+            const diagItems = [
+                { icon: photoCnt <= 3 ? '🔴' : photoCnt <= 6 ? '🟡' : '🟢', label: '写真枚数', note: `${photoCnt}枚（推奨: 10枚以上）`, cls: photoCnt <= 3 ? 'bad' : photoCnt <= 6 ? 'warn' : 'ok' },
+                { icon: reviewCnt <= 5 ? '🔴' : reviewCnt <= 20 ? '🟡' : '🟢', label: '口コミ数', note: `${reviewCnt}件（競合平均: 30件以上）`, cls: reviewCnt <= 5 ? 'bad' : 'warn' },
+                { icon: rating && rating >= 4.0 ? '🟢' : rating ? '🟡' : '⚫', label: '平均評価', note: rating ? `★${rating.toFixed(1)}` : '未取得', cls: rating && rating >= 4.0 ? 'ok' : 'warn' },
+                { icon: '⚠️', label: 'GBP最適化', note: 'キーワード・カテゴリー要見直し', cls: 'warn' },
+            ];
+
+            // モーダル作成
+            let modal = document.getElementById('_previewModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = '_previewModal';
+                modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;';
+                modal.innerHTML = `
+                    <div style="background:#fff;border-radius:12px;width:100%;max-width:680px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #e5e9f0;">
+                            <span style="font-weight:700;font-size:.875rem;">📄 レポートプレビュー</span>
+                            <button onclick="document.getElementById('_previewModal').style.display='none'"
+                                style="background:none;border:none;font-size:18px;cursor:pointer;color:#666;">✕</button>
+                        </div>
+                        <iframe id="_previewFrame" src="gbp_dm_template.html"
+                            style="flex:1;border:none;border-radius:0 0 12px 12px;" width="100%"></iframe>
+                    </div>`;
+                document.body.appendChild(modal);
+            }
+            modal.style.display = 'flex';
+
+            // iframeロード後にfillReport()を呼び出す
+            const frame = document.getElementById('_previewFrame');
+            const inject = () => {
+                try {
+                    frame.contentWindow.fillReport({
+                        name: coName,
+                        address,
+                        score: rank,
+                        diagItems,
+                        photos: [ss1, ss2].filter(Boolean),
+                        salesText,
+                    });
+                } catch (e) {
+                    console.warn('fillReport失敗:', e.message);
+                }
+            };
+            // 既にロード済みの場合は即実行、未ロード時はonload
+            if (frame.contentDocument && frame.contentDocument.readyState === 'complete') {
+                inject();
+            } else {
+                frame.onload = inject;
+                frame.src = 'gbp_dm_template.html?' + Date.now();  // キャッシュバスト
+            }
+        }
+
+
+        // ── R4: Driveフォルダ内画像選択モーダル ──────────────────────────────
+        async function openDriveFolderModal(idx) {
+            const r = _emailRows[idx];
+            if (!r) return;
+            const driveFolderUrl = r[COL.DRIVE_FOLDER] || '';
+            const coName = r[COL.NAME] || '';
+
+            // フォルダIDを抽出
+            const match = driveFolderUrl.match(/folders\/([a-zA-Z0-9_-]+)/);
+            if (!match) { showToast('DriveフォルダURLが設定されていません'); return; }
+            const folderId = match[1];
+
+            // モーダルを作成/取得
+            let modal = document.getElementById('_driveFolderModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = '_driveFolderModal';
+                modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10001;display:flex;align-items:center;justify-content:center;padding:16px;';
+                modal.innerHTML = `
+                    <div style="background:var(--bg-2);border-radius:12px;width:100%;max-width:520px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line-2);">
+                            <span id="_driveFolderTitle" style="font-weight:700;font-size:.875rem;">📁 画像を選択</span>
+                            <button onclick="document.getElementById('_driveFolderModal').style.display='none'"
+                                style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--t-3);">✕</button>
+                        </div>
+                        <div style="font-size:.6875rem;color:var(--t-3);padding:6px 16px;">最大2枚まで選択 → レポートに埋め込まれます</div>
+                        <div id="_driveFolderGrid" style="padding:12px 16px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;overflow-y:auto;">読み込み中...</div>
+                        <div style="padding:10px 16px;border-top:1px solid var(--line-2);display:flex;justify-content:flex-end;gap:8px;">
+                            <button onclick="driveFolderConfirm()" style="background:var(--accent);color:#000;border:none;padding:8px 18px;border-radius:8px;font-weight:700;font-size:.8125rem;cursor:pointer;">✓ 選択を確定</button>
+                        </div>
+                    </div>`;
+                document.body.appendChild(modal);
+            }
+            modal.style.display = 'flex';
+
+            // 状態リセット
+            window._driveFolderIdx = idx;
+            window._driveFolderSelected = [];
+            document.getElementById('_driveFolderTitle').textContent = `📁 ${coName} — 画像を選択`;
+            const grid = document.getElementById('_driveFolderGrid');
+            grid.innerHTML = '<div style="grid-column:1/-1;font-size:.8125rem;color:var(--t-3);">読み込み中...</div>';
+
+            // Drive APIでフォルダ内画像取得
+            try {
+                const token = await _getSalesToken();
+                if (!token) { grid.innerHTML = '<div style="grid-column:1/-1;color:var(--red);font-size:.8125rem;">Googleログインが必要です</div>'; return; }
+
+                const q = encodeURIComponent(`'${folderId}' in parents and mimeType contains 'image/' and trashed=false`);
+                const url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=20&orderBy=name`;
+                const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+                if (!res.ok) throw new Error(`Drive API ${res.status}`);
+                const data = await res.json();
+                const files = data.files || [];
+
+                if (!files.length) {
+                    grid.innerHTML = '<div style="grid-column:1/-1;font-size:.8125rem;color:var(--t-3);">画像がありません</div>';
+                    return;
+                }
+
+                // サムネイルグリッド描画
+                grid.innerHTML = files.map(f => {
+                    const thumbUrl = `https://drive.google.com/thumbnail?id=${f.id}&sz=w200`;
+                    const viewUrl = `https://drive.google.com/uc?export=view&id=${f.id}`;
+                    return `<div id="_df_${f.id}" data-url="${viewUrl}" data-name="${f.name}"
+                        onclick="driveFolderToggle('${f.id}', '${viewUrl}')"
+                        style="cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid transparent;position:relative;aspect-ratio:1;background:#111;">
+                        <img src="${thumbUrl}" alt="${f.name}" loading="lazy"
+                            style="width:100%;height:100%;object-fit:cover;"
+                            onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\'><text y=\'30\' font-size=\'30\'>🖼️</text></svg>'">
+                        <div class="_df_check" style="display:none;position:absolute;top:4px;right:4px;background:var(--accent);border-radius:50%;width:20px;height:20px;font-size:12px;display:none;align-items:center;justify-content:center;">✓</div>
+                    </div>`;
+                }).join('');
+            } catch (e) {
+                grid.innerHTML = `<div style="grid-column:1/-1;color:var(--red);font-size:.8125rem;">取得失敗: ${e.message}</div>`;
+            }
+        }
+
+        function driveFolderToggle(fileId, viewUrl) {
+            const el = document.getElementById('_df_' + fileId);
+            if (!el) return;
+            const sel = window._driveFolderSelected || [];
+            const existIdx = sel.indexOf(viewUrl);
+            if (existIdx >= 0) {
+                sel.splice(existIdx, 1);
+                el.style.borderColor = 'transparent';
+                const check = el.querySelector('._df_check');
+                if (check) check.style.display = 'none';
+            } else {
+                if (sel.length >= 2) { showToast('最大2枚まで選択できます'); return; }
+                sel.push(viewUrl);
+                el.style.borderColor = 'var(--accent)';
+                const check = el.querySelector('._df_check');
+                if (check) { check.style.display = 'flex'; }
+            }
+            window._driveFolderSelected = sel;
+        }
+
+        async function driveFolderConfirm() {
+            const idx = window._driveFolderIdx;
+            const sel = window._driveFolderSelected || [];
+            document.getElementById('_driveFolderModal').style.display = 'none';
+
+            const ss1 = sel[0] || '';
+            const ss2 = sel[1] || '';
+
+            // ローカルキャッシュ更新
+            const r = _emailRows[idx];
+            if (r) {
+                r[COL.SCREENSHOT1] = ss1;
+                r[COL.SCREENSHOT2] = ss2;
+            }
+
+            // スプシに保存
+            const rowIndex = idx + 2;
+            await Promise.all([
+                Sheets.updateCellByHeader(CONFIG.SHEETS.CHECKED_EMAIL, rowIndex, 'レポート用スクショ①', ss1).catch(() => { }),
+                Sheets.updateCellByHeader(CONFIG.SHEETS.CHECKED_EMAIL, rowIndex, 'レポート用スクショ②', ss2).catch(() => { }),
+            ]);
+
+            // サムネイルをカードに表示
+            const thumbsEl = document.getElementById('img-thumbs-' + idx);
+            const previewEl = document.getElementById('img-preview-' + idx);
+            if (thumbsEl && previewEl) {
+                thumbsEl.innerHTML = sel.map(url =>
+                    `<img src="${url}" style="width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid var(--line-2);">`
+                ).join('');
+                previewEl.style.display = sel.length ? 'block' : 'none';
+            }
+
+            showToast(`✅ 画像${sel.length}枚を選択しました`);
+        }
+
+        // Drive OAuth トークン取得（sales.html 用）
+        async function _getSalesToken() {
+            try {
+                if (window.gapi && gapi.auth2) {
+                    const inst = gapi.auth2.getAuthInstance();
+                    if (inst && inst.isSignedIn.get()) {
+                        return inst.currentUser.get().getAuthResponse().access_token;
+                    }
+                }
+            } catch (e) { /* ignore */ }
+            return null;
+        }
+
+        // ── R5: PDF保存（プレビュー画面→html2pdf→Drive） ─────────────────────
+        async function savePdfAndLink(idx) {
+            const r = _emailRows[idx];
+            if (!r) return;
+            const coName = r[COL.NAME] || 'report';
+            const btn = document.getElementById('btn-pdf-' + idx);
+            if (btn) { btn.disabled = true; btn.textContent = 'PDF生成中...'; }
+
+            try {
+                if (typeof html2pdf === 'undefined') throw new Error('html2pdf.jsが読み込まれていません');
+
+                // プレビューが未表示の場合はデータを用意する（不可視iframe）
+                let frame = document.getElementById('_previewFrame');
+                if (!frame || !frame.contentDocument || !frame.contentWindow.fillReport) {
+                    // previewReport を silent 実行
+                    previewReport(idx);
+                    // iframeロード待ち
+                    frame = document.getElementById('_previewFrame');
+                    await new Promise(res => {
+                        if (frame.contentDocument && frame.contentDocument.readyState === 'complete') { res(); return; }
+                        frame.onload = res;
+                    });
+                }
+
+                // iframe のドキュメントを html2pdf でPDF化
+                const doc = frame.contentDocument || frame.contentWindow.document;
+                const opt = {
+                    margin: 0,
+                    filename: `report_${coName}.pdf`,
+                    image: { type: 'jpeg', quality: 0.92 },
+                    html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                };
+                const blob = await html2pdf().from(doc.body).set(opt).outputPdf('blob');
+
+                // Blob → Base64
+                const base64 = await new Promise((res, rej) => {
+                    const reader = new FileReader();
+                    reader.onload = () => res(reader.result.split(',')[1]);
+                    reader.onerror = rej;
+                    reader.readAsDataURL(blob);
+                });
+
+                // GAS経由でDriveに保存
+                const resp = await fetch(CONFIG.GAS_EMAIL_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        secret: CONFIG.GAS_SECRET,
+                        action: 'saveFile',
+                        filename: `report_${coName}.pdf`,
+                        mimeType: 'application/pdf',
+                        base64,
+                    }),
+                });
+                const result = await resp.json();
+                if (!result.ok) throw new Error(result.error || 'Drive保存失敗');
+
+                // ローカルキャッシュにfileIdを保存（メールGO時に使用）
+                if (r) r._pdfDriveId = result.fileId;
+                if (btn) {
+                    btn.textContent = '📄 保存済み ✓';
+                    btn.style.color = 'var(--green, #22c55e)';
+                    btn.style.borderColor = 'var(--green, #22c55e)';
+                }
+                showToast(`✅ PDF保存完了: ${coName}`);
+            } catch (e) {
+                if (btn) { btn.disabled = false; btn.textContent = '📄 PDF保存'; }
+                showToast(`❌ PDF失敗: ${e.message}`);
+            }
+        }
+
+        // ── スクショアップロード ──
+        async function uploadScreenshot(idx, input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64 = e.target.result.split(',')[1];
+                const r = _emailRows[idx];
+                if (!r) return;
+                try {
+                    const res = await fetch(CONFIG.GAS_EMAIL_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify({
+                            secret: CONFIG.GAS_SECRET,
+                            action: 'saveFile',
+                            base64,
+                            mimeType: file.type,
+                            filename: `screenshot_${(r[COL.NAME] || idx).replace(/[^\w]/g, '_')}_${Date.now()}.${file.name.split('.').pop()}`,
+                        }),
+                    });
+                    const data = await res.json();
+                    if (!data.ok) throw new Error(data.error);
+                    _addImageThumb(idx, `https://drive.google.com/thumbnail?id=${data.fileId}&sz=w128`, data.fileId);
+                    showToast('📤 スクショをDriveに保存しました');
+                } catch (err) {
+                    alert('アップロード失敗: ' + err.message);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ── 画像サムネ追加（選択中表示）──
+        function _addImageThumb(idx, thumbUrl, fileId) {
+            const preview = document.getElementById('img-preview-' + idx);
+            const thumbs = document.getElementById('img-thumbs-' + idx);
+            if (!preview || !thumbs) return;
+            preview.style.display = '';
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'position:relative;display:inline-block;';
+            wrap.dataset.fileId = fileId;
+            wrap.innerHTML = `
+                <img src="${thumbUrl}" style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:2px solid var(--blue);" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2764%27 height=%2764%27 fill=%27%23444%27 viewBox=%270 0 16 16%27%3E%3Cpath d=%27M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z%27/%3E%3Cpath d=%27M1 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H1zm13 2v8.88l-3.166-3.166a.5.5 0 0 0-.707 0L7.5 10.981 5.854 9.338a.5.5 0 0 0-.707 0L2 12.5V3h12z%27/%3E%3C/svg%3E'">
+                <button onclick="this.closest('[data-file-id]').remove();" style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--red);color:#fff;border:none;border-radius:50%;font-size:10px;line-height:1.4;cursor:pointer;">×</button>
+            `;
+            thumbs.appendChild(wrap);
+        }
+
+        // ── 選択済みfileId取得 ──
+        function _getSelectedFileIds(idx) {
+            const thumbs = document.getElementById('img-thumbs-' + idx);
+            if (!thumbs) return [];
+            return Array.from(thumbs.querySelectorAll('[data-file-id]')).map(el => el.dataset.fileId);
+        }
+
+        // ── PDF生成 → Drive保存 → メール送信 ──
+        async function generateAndSendEmail(idx) {
+            const r = _emailRows[idx];
+            if (!r) return;
+            const btn = document.getElementById('btn-email-send-' + idx);
+            if (btn) { btn.disabled = true; btn.textContent = '送信中...'; }
+
+            try {
+                const coName = r[COL.NAME] || '';
+                const toEmail = r[COL.EMAIL] || '';
+                if (!toEmail) throw new Error('メールアドレスが設定されていません');
+                const draft = r[COL.DRAFT] || buildDraftText(coName, r);
+                const fileIds = _getSelectedFileIds(idx);
+
+                let pdfDriveId = null;
+                // html2pdf.jsが読み込まれていてかつ画像が選択されていればPDF生成
+                if (typeof html2pdf !== 'undefined' && fileIds.length > 0) {
+                    const imgHtml = fileIds.map(id =>
+                        `<img src="https://drive.google.com/uc?id=${id}" style="max-width:100%;margin:8px 0;">`
+                    ).join('');
+                    const reportHtml = `
+                        <div style="font-family:'Noto Sans JP',sans-serif;padding:24px;max-width:600px;">
+                            <h2 style="color:#1a73e8;margin-bottom:4px;">GBP無料診断レポート</h2>
+                            <p style="color:#666;font-size:13px;">Blue Life 青木</p>
+                            <hr>
+                            <p><b>${coName}</b> ご担当者様</p>
+                            <pre style="white-space:pre-wrap;font-size:13px;line-height:1.7;">${draft}</pre>
+                            <h3>現状の写真</h3>
+                            ${imgHtml}
+                            <hr>
+                            <p style="font-size:12px;color:#666;">Blue Life 青木 / bluelife.aoki@gmail.com</p>
+                        </div>`;
+                    const pdfBlob = await html2pdf().from(reportHtml).outputPdf('blob');
+                    const b64 = await new Promise(res => {
+                        const fr = new FileReader();
+                        fr.onload = () => res(fr.result.split(',')[1]);
+                        fr.readAsDataURL(pdfBlob);
+                    });
+                    const saved = await (await fetch(CONFIG.GAS_EMAIL_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify({
+                            secret: CONFIG.GAS_SECRET,
+                            action: 'saveFile',
+                            base64: b64,
+                            mimeType: 'application/pdf',
+                            filename: `report_${coName.replace(/[^\w]/g, '_')}_${Date.now()}.pdf`,
+                        }),
+                    })).json();
+                    if (saved.ok) pdfDriveId = saved.fileId;
+                }
+
+                // GAS経由メール送信
+                const payload = {
+                    secret: CONFIG.GAS_SECRET,
+                    action: 'sendEmail',
+                    to: toEmail,
+                    subject: `【無料】${coName}様のGoogleマップ集客改善についてご提案`,
+                    body: draft,
+                    companyName: coName,
+                };
+                if (pdfDriveId) payload.pdfDriveId = pdfDriveId;
+                const res = await fetch(CONFIG.GAS_EMAIL_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload),
+                });
+                const result = await res.json();
+                if (!result.ok) {
+                    const errMsg = result.error || 'GAS送信失敗';
+                    if (errMsg.includes('重複')) throw new Error('⏭️ 重複送信防止: このメールアドレスには送信済みです');
+                    if (errMsg.includes('上限')) throw new Error('⛔ 本日の送信上限（50件）に達しました。明日再度お試しください');
+                    throw new Error(errMsg);
+                }
+
+                if (btn) { btn.textContent = '✓ 送信済み'; btn.style.color = 'var(--green)'; btn.style.borderColor = 'var(--green)'; }
+                showToast('📤 メール送信完了' + (pdfDriveId ? '（PDF添付）' : ''));
+                // 送信済みに移動
+                const rowIndex = idx + 2;
+                await fetch(CONFIG.GAS_EMAIL_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ secret: CONFIG.GAS_SECRET, action: 'moveRow', fromSheet: CONFIG.SHEETS.CHECKED_EMAIL, toSheet: CONFIG.SHEETS.SENT, rowIndex, values: r }),
+                });
+            } catch (err) {
+                if (btn) { btn.disabled = false; btn.textContent = '📤 メールGO'; }
+                alert('送信失敗: ' + err.message);
+            }
+        }
+
+
+
+        async function sendAll() {
+            const unsent = _emailRows
+                .map((r, i) => ({ r, i, rowIndex: i + 2 }))
+                .filter(({ r }) => !(r[COL.SEND_STATUS] || '').includes('送信済'));
+            if (!unsent.length) { showToast('送信待ちがありません'); return; }
+            if (!confirm(`${unsent.length}件を一括送信します。\n\n⚠️ 上限: 1日50件まで。重複送信は自動スキップされます。\n\nよろしいですか？`)) return;
+            let ok = 0, ng = 0, skipped = 0;
+            for (const { r, i, rowIndex } of unsent) {
+                const email = r[COL.EMAIL];
+                if (!email) { ng++; continue; }
+                const subject = `【無料】${r[COL.NAME] || ''}様のGoogleマップ集客改善についてご提案`;
+                const body = r[COL.DRAFT] || buildDraftText(r[COL.NAME] || '', r);
+                try {
+                    const res = await fetch(CONFIG.GAS_EMAIL_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify({ secret: CONFIG.GAS_SECRET, action: 'sendEmail', to: email, subject, body }),
+                    });
+                    const data = await res.json();
+                    if (data.ok) {
+                        await Sheets.moveRow(CONFIG.SHEETS.CHECKED_EMAIL, rowIndex, CONFIG.SHEETS.SENT, r);
+                        ok++;
+                        // 上限に近づいたら警告
+                        if (data.remaining !== undefined && data.remaining <= 5) {
+                            showToast(`⚠️ 本日の残り送信可能数: ${data.remaining}件`);
+                        }
+                    } else if (data.error && (data.error.includes('上限') || data.error.includes('重複'))) {
+                        // 上限・重複はスキップ扱い（エラーカウントしない）
+                        skipped++;
+                        showToast(`⏭️ スキップ: ${r[COL.NAME] || email} — ${data.error}`);
+                        if (data.error.includes('上限')) break; // 上限に達したら即停止
+                    } else { ng++; }
+                } catch { ng++; }
+                showToast(`完了: ${ok}件 / スキップ: ${skipped}件 / 失敗: ${ng}件 (${unsent.length}件処理中...)`);
+            }
+            showToast(`一括完了: ✅ ${ok}件 ⏭️ ${skipped}件スキップ ${ng ? '❌ ' + ng + '件失敗' : ''}`);
+            await loadSales();
+        }
+
+        function closeDraft(e) {
+            if (!e || e.target === document.getElementById('draftModal')) {
+                document.getElementById('draftModal').style.display = 'none';
+            }
+        }
+
+        function openFormDraft(idx) {
+            // フォームりの営業文エディタ（共通draftModal流用）
+            const r = _formRows[idx];
+            if (!r) return;
+            const coName = r[COL.NAME] || '（店名なし）';
+            _draftCtx = { rowIndex: idx + 2, toEmail: null, coName, sheetName: CONFIG.SHEETS.CHECKED_FORM, formIdx: idx };
+            document.getElementById('draftCoName').textContent = coName;
+            document.getElementById('draftSubject').textContent = '（フォーム送信）';
+            document.getElementById('draftBody').value = r[COL.DRAFT] || buildDraftText(coName, r);
+            document.getElementById('draftModal').style.display = 'flex';
+        }
+
+        async function sendFormItem(idx) {
+            const r = _formRows[idx];
+            if (!r) return;
+            const formUrl = r[COL.FORM_URL];
+            if (!formUrl) { showToast('フォームURLがありません'); return; }
+            const btn = document.getElementById('btn-form-send-' + idx);
+            const badge = document.getElementById('form-badge-' + idx);
+            if (btn) { btn.disabled = true; btn.textContent = '送信中...'; }
+            try {
+                const salesText = r[COL.DRAFT] || buildDraftText(r[COL.NAME] || '', r);
+                const resp = await fetch('http://localhost:5001/api/form/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        form_url: formUrl,
+                        name: 'Blue Life 青木',
+                        email: 'bluelife.aoki@gmail.com',
+                        phone: '',
+                        body: salesText,
+                    }),
+                });
+                const result = await resp.json();
+                if (!result.ok) throw new Error(result.error || '失敗');
+                if (badge) { badge.textContent = '送信済'; badge.style.background = 'var(--green)'; badge.style.color = '#000'; }
+                if (btn) { btn.textContent = '✅ 完了'; btn.style.background = 'var(--green)'; }
+                showToast(`✅ ${r[COL.NAME] || ''} フォーム送信完了`);
+                await Sheets.moveRow(CONFIG.SHEETS.CHECKED_FORM, idx + 2, CONFIG.SHEETS.SENT, r);
+            } catch (e) {
+                if (btn) { btn.disabled = false; btn.textContent = '📋 フォームGO'; }
+                const offline = e.message.includes('fetch') || e.message.includes('Failed');
+                showToast(offline ? '❌ バックエンド時動中？ (localhost:5001)' : '❌ ' + e.message);
+            }
+        }
+
+        function showToast(msg) {
+            const t = document.createElement('div');
+            t.textContent = msg;
+            Object.assign(t.style, {
+                position: 'fixed', bottom: '80px', left: '50%', transform: 'translateX(-50%)',
+                background: 'var(--bg-3)', color: 'var(--t-1)', padding: '8px 16px',
+                borderRadius: '100px', fontSize: '.75rem', zIndex: '999',
+                boxShadow: 'var(--sh1)', whiteSpace: 'nowrap',
+            });
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2500);
+        }
+
+        loadSales();
+    </script>
+    <script>
+        window.onerror = function (msg, src, line, col, err) {
+            var m = '⚠️ [エラー] ' + msg + (src ? ' (' + src.split('/').pop() + ':' + line + ')' : '');
+            if (typeof showToast === 'function') { showToast(m); }
+            return false;
+        };
+    </script>
+</body>
+
+</html>

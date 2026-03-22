@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLSE — 受信トレイ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="config.js"></script>
+    <script src="sheets.js"></script>
+    <style>
+        /* ── フィルターチップ ── */
+        .filter-chips {
+            display: flex;
+            gap: var(--s2);
+            flex-wrap: wrap;
+            margin-bottom: var(--s4);
+        }
+
+        .chip {
+            padding: 5px 14px;
+            border-radius: 100px;
+            font-size: .75rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--line-2);
+            background: transparent;
+            color: var(--t-2);
+            transition: var(--fast);
+            font-family: var(--sans);
+        }
+
+        .chip:hover {
+            background: var(--bg-3);
+            color: var(--t-1);
+        }
+
+        .chip.active {
+            background: var(--blue);
+            border-color: var(--blue);
+            color: #fff;
+        }
+
+        .chip-count {
+            opacity: .6;
+            margin-left: 4px;
+        }
+
+        /* ── スレッド一覧アイテム ── */
+        .thread-item {
+            padding: var(--s4);
+            border-bottom: 1px solid var(--line-1);
+            cursor: pointer;
+            transition: var(--fast);
+            display: flex;
+            gap: var(--s3);
+            align-items: flex-start;
+        }
+
+        .thread-item:hover {
+            background: var(--bg-3);
+        }
+
+        .thread-item:last-child {
+            border-bottom: none;
+        }
+
+        .thread-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--bg-3);
+            border: 1px solid var(--line-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .875rem;
+            font-weight: 700;
+            color: var(--t-2);
+            flex-shrink: 0;
+        }
+
+        .thread-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .thread-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .thread-name {
+            font-size: .875rem;
+            font-weight: 600;
+            color: var(--t-1);
+        }
+
+        .thread-co {
+            font-size: .6875rem;
+            color: var(--t-3);
+            margin-top: 1px;
+        }
+
+        .thread-time {
+            font-size: .6875rem;
+            color: var(--t-3);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .thread-preview {
+            font-size: .8125rem;
+            color: var(--t-3);
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .thread-meta {
+            display: flex;
+            gap: var(--s2);
+            margin-top: 6px;
+            align-items: center;
+        }
+
+        .unread-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--blue);
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+
+        /* ── 統計チップ ── */
+        .stat-row {
+            display: flex;
+            gap: var(--s2);
+            margin-bottom: var(--s4);
+            flex-wrap: wrap;
+        }
+
+        .stat-chip {
+            padding: 5px 12px;
+            background: var(--bg-1);
+            border: 1px solid var(--line-1);
+            border-radius: var(--r1);
+            font-size: .8125rem;
+        }
+
+        .stat-chip b {
+            color: var(--t-1);
+        }
+
+        /* ── スレッド詳細モーダル ── */
+        #threadModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(0, 0, 0, .65);
+            backdrop-filter: blur(4px);
+            align-items: flex-end;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .thread-panel {
+            background: var(--bg-1);
+            width: 100%;
+            max-width: 600px;
+            border-radius: var(--r3) var(--r3) 0 0;
+            height: 92vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--sh2);
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        .thread-panel-header {
+            padding: var(--s4) var(--s5);
+            border-bottom: 1px solid var(--line-1);
+            display: flex;
+            align-items: center;
+            gap: var(--s3);
+            flex-shrink: 0;
+        }
+
+        .thread-panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--s4) var(--s5);
+        }
+
+        .thread-panel-footer {
+            padding: var(--s3) var(--s5);
+            border-top: 1px solid var(--line-1);
+            flex-shrink: 0;
+            display: flex;
+            gap: var(--s2);
+        }
+
+        /* ── 送信ブロック ── */
+        .sent-block {
+            background: var(--bg-2);
+            border: 1px solid var(--line-1);
+            border-radius: var(--r2);
+            padding: var(--s4);
+            margin-bottom: var(--s4);
+        }
+
+        .sent-block-label {
+            font-size: .625rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            color: var(--t-3);
+            text-transform: uppercase;
+            margin-bottom: var(--s2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sent-block-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--line-1);
+        }
+
+        .sent-subject {
+            font-size: .875rem;
+            font-weight: 600;
+            color: var(--t-1);
+            margin-bottom: var(--s2);
+        }
+
+        .sent-body {
+            font-size: .8125rem;
+            color: var(--t-2);
+            line-height: 1.7;
+            white-space: pre-wrap;
+            max-height: 140px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sent-body.expanded {
+            max-height: none;
+        }
+
+        .sent-expand {
+            font-size: .75rem;
+            color: var(--blue);
+            cursor: pointer;
+            margin-top: 4px;
+            background: none;
+            border: none;
+            padding: 0;
+            font-family: var(--sans);
+        }
+
+        .sent-channel {
+            display: inline-block;
+            font-size: .625rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 100px;
+            letter-spacing: .05em;
+            margin-bottom: var(--s2);
+        }
+
+        .channel-mail {
+            background: color-mix(in srgb, var(--blue) 15%, transparent);
+            color: var(--blue);
+        }
+
+        .channel-form {
+            background: color-mix(in srgb, var(--yellow) 15%, transparent);
+            color: var(--yellow);
+        }
+
+        /* ── 添付画像サムネイル ── */
+        .img-thumbs {
+            display: flex;
+            gap: 6px;
+            margin-top: var(--s2);
+            flex-wrap: wrap;
+        }
+
+        .img-thumb {
+            width: 52px;
+            height: 52px;
+            border-radius: var(--r1);
+            background: var(--bg-3);
+            border: 1px solid var(--line-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .5625rem;
+            color: var(--t-3);
+            text-align: center;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .img-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* ── 返信バブル ── */
+        .reply-divider {
+            display: flex;
+            align-items: center;
+            gap: var(--s2);
+            margin: var(--s4) 0;
+            font-size: .625rem;
+            color: var(--t-3);
+            font-weight: 600;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .reply-divider::before,
+        .reply-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--line-1);
+        }
+
+        .reply-bubble {
+            background: var(--bg-2);
+            border: 1px solid var(--line-1);
+            border-radius: var(--r2);
+            padding: var(--s3) var(--s4);
+            margin-bottom: var(--s3);
+        }
+
+        .reply-bubble-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--s2);
+        }
+
+        .reply-from {
+            font-size: .8125rem;
+            font-weight: 600;
+            color: var(--t-1);
+        }
+
+        .reply-time {
+            font-size: .6875rem;
+            color: var(--t-3);
+        }
+
+        .reply-text {
+            font-size: .8125rem;
+            color: var(--t-2);
+            line-height: 1.7;
+        }
+
+        /* ── 次のアクション ── */
+        .next-action {
+            background: var(--bg-2);
+            border: 1px solid var(--line-2);
+            border-left: 3px solid var(--blue);
+            border-radius: 0 var(--r1) var(--r1) 0;
+            padding: 10px var(--s3);
+            margin-bottom: var(--s4);
+            font-size: .8125rem;
+            color: var(--t-2);
+        }
+
+        .next-action b {
+            color: var(--blue);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <span class="topbar-logo">BLSE</span>
+        <div class="topbar-right">
+            <span class="topbar-user">AOKI</span>
+            <button class="topbar-menu-btn" onclick="toggleMenu()">
+                <span class="hamburger"><span></span><span></span><span></span></span>
+            </button>
+        </div>
+    </header>
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+    <nav class="slide-menu" id="slideMenu">
+        <button class="menu-close" onclick="toggleMenu()">&#x2715;</button>
+        <div class="menu-section-label">メニュー</div>
+        <a href="index.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="1" width="6" height="6" rx="1" fill="currentColor" />
+                <rect x="9" y="1" width="6" height="6" rx="1" fill="currentColor" />
+                <rect x="1" y="9" width="6" height="6" rx="1" fill="currentColor" />
+                <rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor" />
+            </svg>ダッシュボード</a>
+        <a href="search.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5" />
+                <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>検索</a>
+        <a href="check.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>チェック</a>
+        <a href="sales.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M2 13l4-4 3 3 5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>営業</a>
+        <a href="inbox.html" class="menu-item active"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                <path d="M1 5l7 5 7-5" stroke="currentColor" stroke-width="1.5" />
+            </svg>受信トレイ</a>
+        <a href="log.html" class="menu-item"><svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M2 4h12M2 8h8M2 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>ログ</a>
+    </nav>
+
+    <main class="main">
+        <!-- 統計 -->
+        <div class="stat-row animate-in">
+            <div class="stat-chip"><b>12</b>&nbsp;<span class="t-muted">合計</span></div>
+            <div class="stat-chip"><b style="color:var(--blue)">3</b>&nbsp;<span class="t-muted">未読</span></div>
+            <div class="stat-chip"><b style="color:var(--green)">6</b>&nbsp;<span class="t-muted">見積</span></div>
+            <div class="stat-chip"><b style="color:var(--yellow)">2</b>&nbsp;<span class="t-muted">質問</span></div>
+            <div class="stat-chip"><b style="color:var(--red)">4</b>&nbsp;<span class="t-muted">断り</span></div>
+        </div>
+
+        <!-- フィルター -->
+        <div class="filter-chips animate-in">
+            <button class="chip active" onclick="filterChip(this,'all')">すべて <span class="chip-count">12</span></button>
+            <button class="chip" onclick="filterChip(this,'estimate')">見積 <span class="chip-count">6</span></button>
+            <button class="chip" onclick="filterChip(this,'question')">質問 <span class="chip-count">2</span></button>
+            <button class="chip" onclick="filterChip(this,'reject')">断り <span class="chip-count">4</span></button>
+            <button class="chip" onclick="filterChip(this,'pending')">未対応 <span class="chip-count">3</span></button>
+        </div>
+
+        <!-- スレッド一覧 -->
+        <div class="card animate-in" style="padding:0;overflow:hidden;">
+
+            <!-- 田中表具店 -->
+            <div class="thread-item" onclick="openThread('tanaka')">
+                <div class="unread-dot"></div>
+                <div class="thread-avatar">田中</div>
+                <div class="thread-main">
+                    <div class="thread-row">
+                        <div>
+                            <div class="thread-name">田中 誠</div>
+                            <div class="thread-co">田中表具店 · メール</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="thread-time">14:32</div>
+                            <div style="margin-top:4px;"><span class="badge badge-green"
+                                    style="font-size:.625rem;">見積</span></div>
+                        </div>
+                    </div>
+                    <div class="thread-preview">ご連絡いただきありがとうございます。ぜひ詳しい資料をお送りください...</div>
+                    <div class="thread-meta">
+                        <span style="font-size:.625rem;color:var(--t-3);">返信 1件</span>
+                        <span style="font-size:.625rem;color:var(--t-3);">·</span>
+                        <span style="font-size:.625rem;color:var(--t-3);">画像 2枚</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 佐藤工務店 -->
+            <div class="thread-item" onclick="openThread('sato')">
+                <div class="thread-avatar">佐藤</div>
+                <div class="thread-main">
+                    <div class="thread-row">
+                        <div>
+                            <div class="thread-name">佐藤 一郎</div>
+                            <div class="thread-co">佐藤工務店 · フォーム</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="thread-time">昨日</div>
+                            <div style="margin-top:4px;"><span class="badge badge-yellow"
+                                    style="font-size:.625rem;">質問</span></div>
+                        </div>
+                    </div>
+                    <div class="thread-preview">費用はどのくらいかかりますか？また導入期間についても...</div>
+                    <div class="thread-meta">
+                        <span style="font-size:.625rem;color:var(--t-3);">返信 1件</span>
+                        <span style="font-size:.625rem;color:var(--t-3);">·</span>
+                        <span style="font-size:.625rem;color:var(--t-3);">画像なし</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 高瀬塗装工業 -->
+            <div class="thread-item" onclick="openThread('takase')">
+                <div class="unread-dot"></div>
+                <div class="thread-avatar">高瀬</div>
+                <div class="thread-main">
+                    <div class="thread-row">
+                        <div>
+                            <div class="thread-name">高瀬 正幸</div>
+                            <div class="thread-co">高瀬塗装工業 · メール</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="thread-time">3/17</div>
+                            <div style="margin-top:4px;"><span class="badge badge-red"
+                                    style="font-size:.625rem;">断り</span></div>
+                        </div>
+                    </div>
+                    <div class="thread-preview">現在は必要ございません。またご縁があれば...</div>
+                    <div class="thread-meta">
+                        <span style="font-size:.625rem;color:var(--t-3);">返信 1件</span>
+                        <span style="font-size:.625rem;color:var(--t-3);">·</span>
+                        <span style="font-size:.625rem;color:var(--t-3);">画像 2枚</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 水野商店 -->
+            <div class="thread-item" onclick="openThread('mizuno')">
+                <div class="thread-avatar">水野</div>
+                <div class="thread-main">
+                    <div class="thread-row">
+                        <div>
+                            <div class="thread-name">水野 義人</div>
+                            <div class="thread-co">水野商店 · メール</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="thread-time">3/16</div>
+                            <div style="margin-top:4px;"><span class="badge badge-green"
+                                    style="font-size:.625rem;">見積</span></div>
+                        </div>
+                    </div>
+                    <div class="thread-preview">資料拝見しました。一度お話を聞いてみたいと思います...</div>
+                    <div class="thread-meta">
+                        <span style="font-size:.625rem;color:var(--t-3);">返信 1件</span>
+                        <span style="font-size:.625rem;color:var(--t-3);">·</span>
+                        <span style="font-size:.625rem;color:var(--t-3);">画像 2枚</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- スレッド詳細モーダル -->
+    <div id="threadModal" onclick="closeThread(event)">
+        <div class="thread-panel">
+            <!-- ヘッダー -->
+            <div class="thread-panel-header">
+                <button onclick="closeThread()"
+                    style="background:none;border:none;color:var(--t-3);cursor:pointer;font-size:1.1rem;padding:0;">‹</button>
+                <div style="flex:1;">
+                    <div id="tName" style="font-size:.9375rem;font-weight:700;color:var(--t-1);"></div>
+                    <div id="tCo" style="font-size:.75rem;color:var(--t-3);"></div>
+                </div>
+                <span id="tBadge" class="badge" style="font-size:.625rem;"></span>
+            </div>
+
+            <!-- ボディ（スクロール） -->
+            <div class="thread-panel-body" id="tBody"></div>
+
+            <!-- フッター -->
+            <div class="thread-panel-footer">
+                <button class="btn btn-sm btn-success" style="flex:1;">対応済みにする</button>
+                <button class="btn btn-sm btn-secondary">Gmailで開く</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById('slideMenu').classList.toggle('active');
+            document.getElementById('menuOverlay').classList.toggle('active');
+        }
+        function filterChip(el) {
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // ── スレッドデータ ───────────────────────────────────────────
+        const threads = {
+            tanaka: {
+                name: '田中 誠', co: '田中表具店 · メール', badge: '見積', badgeClass: 'badge-green',
+                channel: 'mail',
+                sent: {
+                    date: '2026/03/17',
+                    subject: '【無料】田中表具店様のGoogleマップ集客改善についてご提案',
+                    body: `田中表具店 ご担当者様
+
+はじめてご連絡いたします。
+Googleマップ（GBP）の無料改善サポートをご提供しているBlue Lifeと申します。
+
+貴店のGoogleマップを拝見したところ、以下の点が気になりました。
+
+・投稿が0件（競合店は月4〜8件投稿）
+・写真が少なく、近隣競合と比べて印象が弱い
+
+この状態を改善するだけで、
+Googleマップ経由の問い合わせが増える可能性があります。
+
+まずは無料で現状診断レポートをお渡しできますので、
+ご検討いただければ幸いです。
+
+Blue Life  青木 勇気`,
+                    images: ['GBP全体.png', '投稿タブ.png']
+                },
+                replies: [
+                    {
+                        from: '田中 誠', time: '今日 14:32',
+                        text: 'ご連絡いただきありがとうございます。\nGoogleマップについて詳しく知りたいと思っていたところでした。ぜひ詳しい資料をお送りください。費用感なども教えていただけると助かります。'
+                    }
+                ],
+                nextAction: '見積資料を送付 → 3/22までに対応'
+            },
+            sato: {
+                name: '佐藤 一郎', co: '佐藤工務店 · フォーム', badge: '質問', badgeClass: 'badge-yellow',
+                channel: 'form',
+                sent: {
+                    date: '2026/03/16',
+                    subject: null,
+                    body: `佐藤工務店 ご担当者様
+
+はじめてご連絡いたします。
+GBP（Googleマップ）の無料改善サポートをご提供しているBlue Lifeと申します。
+
+貴店のGoogleマップを確認したところ、競合比較で写真数・投稿頻度に改善余地がありました。
+
+改善サポートは完全無料です。まずはご相談だけでも。
+
+Blue Life  青木 勇気
+ref: SATO-20260316`,
+                    images: []
+                },
+                replies: [
+                    {
+                        from: '佐藤 一郎', time: '昨日 10:15',
+                        text: '費用はどのくらいかかりますか？また導入期間についても教えていただけますか？'
+                    }
+                ],
+                nextAction: '質問への回答メールを送信（無料の旨を明確に）'
+            },
+            takase: {
+                name: '高瀬 正幸', co: '高瀬塗装工業 · メール', badge: '断り', badgeClass: 'badge-red',
+                channel: 'mail',
+                sent: {
+                    date: '2026/03/15',
+                    subject: '【無料】高瀬塗装工業様のGoogleマップ集客改善についてご提案',
+                    body: `高瀬塗装工業 ご担当者様
+
+はじめてご連絡いたします。Blue Lifeの青木と申します。
+
+貴社のGoogleマップを拝見し、
+・写真が1枚のみ（業界平均は10枚以上）
+・営業時間が未設定
+という点が気になりました。
+
+無料でサポートできますので、お気軽にご連絡ください。
+
+Blue Life  青木 勇気`,
+                    images: ['GBP全体.png', '投稿タブ.png']
+                },
+                replies: [
+                    {
+                        from: '高瀬 正幸', time: '3/17 09:44',
+                        text: 'ご連絡ありがとうございます。\n現在は必要ございません。またご縁があればよろしくお願いいたします。'
+                    }
+                ],
+                nextAction: '3ヶ月後に再アプローチ予定（6/17以降）'
+            },
+            mizuno: {
+                name: '水野 義人', co: '水野商店 · メール', badge: '見積', badgeClass: 'badge-green',
+                channel: 'mail',
+                sent: {
+                    date: '2026/03/14',
+                    subject: '【無料】水野商店様のGoogleマップ集客改善についてご提案',
+                    body: `水野商店 ご担当者様
+
+はじめてご連絡いたします。Blue Lifeの青木と申します。
+
+Googleマップを拝見したところ、
+・投稿が0件
+・写真が3枚（上位競合は平均12枚）
+・評価3.2と低め
+
+このままでは検索で埋もれてしまいます。
+無料で改善サポートができますので、ぜひご検討ください。
+
+Blue Life  青木 勇気`,
+                    images: ['GBP全体.png', '投稿タブ.png']
+                },
+                replies: [
+                    {
+                        from: '水野 義人', time: '3/16 16:20',
+                        text: '資料を拝見しました。一度お話を聞いてみたいと思います。来週あたりにお時間いただけますか？'
+                    }
+                ],
+                nextAction: '日程調整の返信を送る（来週中に商談設定）'
+            }
+        };
+
+        // ── スレッドを開く ───────────────────────────────────────────
+        function openThread(id) {
+            const t = threads[id];
+            if (!t) return;
+            document.getElementById('tName').textContent = t.name;
+            document.getElementById('tCo').textContent = t.co;
+            const badge = document.getElementById('tBadge');
+            badge.textContent = t.badge;
+            badge.className = `badge ${t.badgeClass}`;
+            badge.style.fontSize = '.625rem';
+
+            let html = '';
+
+            // 次のアクション
+            if (t.nextAction) {
+                html += `<div class="next-action"><b>▶ Next:</b> ${t.nextAction}</div>`;
+            }
+
+            // 送信ブロック
+            const chLabel = t.channel === 'mail' ? 'メール送信' : 'フォーム送信';
+            const chClass = t.channel === 'mail' ? 'channel-mail' : 'channel-form';
+            html += `<div class="sent-block">
+                <div class="sent-block-label">${t.sent.date} — 送信内容</div>
+                <span class="sent-channel ${chClass}">${chLabel}</span>`;
+            if (t.sent.subject) {
+                html += `<div class="sent-subject">${t.sent.subject}</div>`;
+            }
+            html += `<div class="sent-body" id="sb-${id}">${escHtml(t.sent.body)}</div>
+                <button class="sent-expand" onclick="expandSent('${id}')">▼ 全文を見る</button>`;
+
+            // 添付画像
+            if (t.sent.images.length) {
+                html += `<div class="img-thumbs">`;
+                t.sent.images.forEach(img => {
+                    html += `<div class="img-thumb" title="${img}">
+                        <span style="padding:4px;">${img}</span>
+                    </div>`;
+                });
+                html += `</div>`;
+            } else {
+                html += `<div style="font-size:.75rem;color:var(--t-3);margin-top:var(--s2);">添付画像なし（フォーム送信）</div>`;
+            }
+            html += `</div>`;
+
+            // 返信バブル
+            if (t.replies.length) {
+                html += `<div class="reply-divider">返信 ${t.replies.length}件</div>`;
+                t.replies.forEach(r => {
+                    html += `<div class="reply-bubble">
+                        <div class="reply-bubble-header">
+                            <span class="reply-from">${r.from}</span>
+                            <span class="reply-time">${r.time}</span>
+                        </div>
+                        <div class="reply-text">${escHtml(r.text)}</div>
+                    </div>`;
+                });
+            }
+
+            document.getElementById('tBody').innerHTML = html;
+            document.getElementById('threadModal').style.display = 'flex';
+            // 初期は本文を折りたたみ
+            const sb = document.getElementById(`sb-${id}`);
+            if (sb && sb.scrollHeight <= 144) {
+                sb.nextElementSibling.style.display = 'none';
+            }
+        }
+
+        function closeThread(e) {
+            if (!e || e.target === document.getElementById('threadModal')) {
+                document.getElementById('threadModal').style.display = 'none';
+            }
+        }
+
+        function expandSent(id) {
+            const sb = document.getElementById(`sb-${id}`);
+            sb.classList.toggle('expanded');
+            sb.nextElementSibling.textContent = sb.classList.contains('expanded') ? '▲ 折りたたむ' : '▼ 全文を見る';
+        }
+
+        function escHtml(s) {
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+        }
+
+        // ―― Sheets接続 ――――――――――――――――――――――――
+        async function loadInbox() {
+            try {
+                // 返信ログシートから読み込む（inbox_monitor.gsが書くシート）
+                // ヘッダー: タイムスタンプ / 差出人 / 件名 / 本文冠頭 / カテゴリ / 会社名 / 対応ステータス
+                const rows = await Sheets.readAll(CONFIG.SHEETS.REPLY_LOG, false);
+                if (!rows.length) return;
+                const tbody = document.getElementById('inboxList');
+                if (!tbody) return;
+                const TAG_LABEL = { '見積もり依頼': '💰見積', 'お断り': '🚫断り', '質問': '❓質問', 'その他': '📨その他' };
+                const TAG_CLS = { '見積もり依頼': 't-yellow', 'お断り': 't-red', '質問': 't-blue', 'その他': 't-muted' };
+                tbody.innerHTML = rows.map((r, idx) => {
+                    const dt = r['タイムスタンプ'] ? new Date(r['タイムスタンプ']) : null;
+                    const ts = dt ? (dt.getMonth() + 1) + '/' + dt.getDate() + ' ' + dt.getHours().toString().padStart(2, '0') + ':' + dt.getMinutes().toString().padStart(2, '0') : '—';
+                    const cat = r['カテゴリ'] || 'その他';
+                    const company = r['会社名'] || r['差出人'] || '—';
+                    return `<tr onclick="openThreadByIdx(${idx})" style="cursor:pointer;">
+                        <td>${company}</td>
+                        <td>${escHtml(r['件名'] || '（件名なし）')}</td>
+                        <td><span class="${TAG_CLS[cat] || 't-muted'}">${TAG_LABEL[cat] || cat}</span></td>
+                        <td>${ts}</td>
+                    </tr>`;
+                }).join('');
+                _inboxData = rows;
+            } catch (e) { console.error('inbox読み込み失敗:', e); }
+        }
+
+        let _inboxData = [];
+        function openThreadByIdx(idx) {
+            const r = _inboxData[idx];
+            if (!r) return;
+            const company = r['会社名'] || r['差出人'] || '不明';
+            const cat = r['カテゴリ'] || '';
+            const body = r['本文冠頭'] || '';
+            document.getElementById('tBody').innerHTML = `
+                <div style="margin-bottom:var(--s3);">
+                    <div style="font-size:.6875rem;color:var(--t-3);">${r['差出人'] || ''}</div>
+                    <div style="font-weight:700;margin:4px 0;">${escHtml(r['件名'] || '（件名なし）')}</div>
+                    <div style="font-size:.75rem;color:var(--t-3);">${r['タイムスタンプ'] || ''} 　[${cat}]　対応: ${r['対応ステータス'] || '未対応'}</div>
+                </div>
+                <div style="white-space:pre-wrap;color:var(--t-2);font-size:.875rem;">${escHtml(body)}</div>`;
+            document.getElementById('threadModal').style.display = 'flex';
+        }
+
+        loadInbox();
+    </script>
+    <script>
+        window.onerror = function (msg, src, line, col, err) {
+            var m = '⚠️ [エラー] ' + msg + (src ? ' (' + src.split('/').pop() + ':' + line + ')' : '');
+            if (typeof showToast === 'function') { showToast(m); return false; }
+            var t = document.createElement('div');
+            t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#ef4444;color:#fff;padding:10px 18px;border-radius:8px;font-size:.8125rem;font-weight:600;z-index:99999;max-width:90vw;word-break:break-all;box-shadow:0 4px 12px rgba(0,0,0,.3);';
+            t.textContent = m; document.body.appendChild(t);
+            setTimeout(function () { t.remove(); }, 6000);
+            return false;
+        };
+    </script>
+</body>
+
+</html>
