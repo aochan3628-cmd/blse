@@ -1,17 +1,18 @@
 /**
  * BLSE v2 — 設定ローダー
- * シークレットは localStorage に保存。このファイル自体には秘密情報なし。
- * 初回アクセス時は setup.html にリダイレクト。
+ * セッショントークンで認証済みの場合のみconfigをlocalStorageから読み込む。
+ * 未認証の場合はlogin.htmlへリダイレクト。
  */
 (function () {
   const saved = JSON.parse(localStorage.getItem('BLSE_CONFIG') || '{}');
+  const session = localStorage.getItem('BLSE_SESSION');
 
   window.CONFIG = {
     PLACES_API_KEY: saved.PLACES_API_KEY || '',
     SPREADSHEET_ID: saved.SPREADSHEET_ID || '',
     GAS_EMAIL_URL: saved.GAS_EMAIL_URL || '',
     GAS_SECRET: saved.GAS_SECRET || '',
-    OAUTH_CLIENT_ID: saved.OAUTH_CLIENT_ID || '',
+    OAUTH_CLIENT_ID: '95449188194-ce0j9pbehfn5712o04evdb1kegp98mr5.apps.googleusercontent.com',
     FLASK_BACKEND_URL: saved.FLASK_BACKEND_URL || 'http://192.168.1.233:5001',
     DISCORD_WEBHOOK_ALERTS: saved.DISCORD_WEBHOOK_ALERTS || '',
 
@@ -27,10 +28,12 @@
     }
   };
 
-  // 未設定なら setup.html へ（setup.html自体は除外）
-  const isSetup = location.pathname.endsWith('setup.html');
-  if (!isSetup && !window.CONFIG.GAS_EMAIL_URL) {
+  // login.html自体とコールバックは除外
+  const path = location.pathname;
+  const isLoginPage = path.endsWith('login.html');
+
+  if (!isLoginPage && (!session || !window.CONFIG.GAS_EMAIL_URL)) {
     const back = encodeURIComponent(location.href);
-    location.replace('./setup.html?back=' + back);
+    location.replace('./login.html?back=' + back);
   }
 })();

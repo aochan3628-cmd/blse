@@ -8,9 +8,15 @@ const SECRET = PropertiesService.getScriptProperties().getProperty('GAS_SECRET')
 const SHEET_ID = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID') || '1PHdWvxq2cqIP5JKTamCXlKzlrSVGScZcfhm6HRdKl18';
 const DAILY_SEND_LIMIT = 50; // 1日の送信上限
 
-// ── GETリクエスト（ヘルスチェック + Sheets読み込み） ────────────────
+// ── GETリクエスト（ヘルスチェック + Sheets読み込み + 承認処理） ─────
 function doGet(e) {
   const params = e.parameter;
+
+  // 承認リンク（secretチェックはhandleApprove内で実施）
+  if (params.action === 'approve') {
+    return handleApprove(params);
+  }
+
   if (params.secret !== SECRET) {
     return _json({ ok: false, error: 'Unauthorized' });
   }
@@ -42,7 +48,12 @@ function doPost(e) {
   try {
     const body = JSON.parse(e.postData.contents);
 
-    // シークレット認証
+    // Googleログイン申請（secretなしで受け付ける）
+    if (body.action === 'login') {
+      return handleAuth(body);
+    }
+
+    // シークレット認証（以降の通常操作）
     if (body.secret !== SECRET) {
       return _json({ ok: false, error: 'Unauthorized' });
     }
