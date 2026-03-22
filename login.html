@@ -110,10 +110,9 @@
     </div>
 
     <script>
-        const GAS_URL = (() => {
-            const s = localStorage.getItem('BLSE_GAS_URL');
-            return s || '';
-        })();
+        // GAS デプロイURL（公開情報なのでハードコードOK）
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxuIOH3IjKuCPboy4vyAsFw2XlLZyvfQjbSo99GZXMP1wUAHvrnoF1ZsICkRpeFe_4YQQ/exec';
+
 
         async function handleCredentialResponse(response) {
             showSpinner(true);
