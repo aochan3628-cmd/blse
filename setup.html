@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLSE — 初期設定</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .setup-wrap {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .setup-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 560px;
+        }
+
+        .setup-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .setup-sub {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-group .hint {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .section-divider {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .btn-save {
+            width: 100%;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 28px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-save:hover {
+            opacity: 0.85;
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 13px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .btn-clear {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 12px;
+            float: right;
+            transition: border-color 0.2s;
+        }
+
+        .btn-clear:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        .logo {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            color: var(--accent);
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="setup-wrap">
+        <div class="setup-card">
+            <div class="logo">BLSE</div>
+            <div class="setup-title">初期設定</div>
+            <div class="setup-sub">APIキーとGAS URLをここで入力します。このデータはブラウザのみに保存され、外部には送信されません。</div>
+
+            <div class="section-divider">Google APIs</div>
+
+            <div class="form-group">
+                <label>Places API Key</label>
+                <input type="password" id="places_key" placeholder="AIza..." autocomplete="off">
+                <div class="hint">GCP Console → 認証情報 → APIキー（HTTPリファラー制限推奨）</div>
+            </div>
+
+            <div class="form-group">
+                <label>Spreadsheet ID</label>
+                <input type="text" id="sheet_id" placeholder="1BxiM..." autocomplete="off">
+                <div class="hint">スプシURLの /d/<strong>ここ</strong>/ 部分</div>
+            </div>
+
+            <div class="form-group">
+                <label>OAuth Client ID（任意）</label>
+                <input type="text" id="oauth_id" placeholder="000000.apps.googleusercontent.com" autocomplete="off">
+            </div>
+
+            <div class="section-divider">GAS (メール送信)</div>
+
+            <div class="form-group">
+                <label>GAS デプロイURL</label>
+                <input type="text" id="gas_url" placeholder="https://script.google.com/macros/s/.../exec">
+                <div class="hint">GASエディタ → デプロイ → デプロイを管理 → URL</div>
+            </div>
+
+            <div class="form-group">
+                <label>GAS Secret</label>
+                <input type="password" id="gas_secret" placeholder="GASスクリプトプロパティと同じ値" autocomplete="off">
+            </div>
+
+            <div class="section-divider">バックエンド（任意）</div>
+
+            <div class="form-group">
+                <label>Flask バックエンドURL</label>
+                <input type="text" id="flask_url" placeholder="http://192.168.1.233:5001">
+                <div class="hint">M（Mother-Ship）で起動中の blse-backend URL</div>
+            </div>
+
+            <div class="form-group">
+                <label>Discord Webhook（アラート用・任意）</label>
+                <input type="text" id="discord_alerts" placeholder="https://discord.com/api/webhooks/...">
+            </div>
+
+            <button class="btn-save" onclick="saveConfig()">保存して開始 →</button>
+            <button class="btn-clear" onclick="clearConfig()">設定をクリア</button>
+            <div class="alert-success" id="successMsg">✅ 設定を保存しました。リダイレクトします...</div>
+        </div>
+    </div>
+
+    <script>
+        // 既存設定を読み込んでフォームに表示
+        (function () {
+            const saved = JSON.parse(localStorage.getItem('BLSE_CONFIG') || '{}');
+            if (saved.PLACES_API_KEY) document.getElementById('places_key').value = saved.PLACES_API_KEY;
+            if (saved.SPREADSHEET_ID) document.getElementById('sheet_id').value = saved.SPREADSHEET_ID;
+            if (saved.OAUTH_CLIENT_ID) document.getElementById('oauth_id').value = saved.OAUTH_CLIENT_ID;
+            if (saved.GAS_EMAIL_URL) document.getElementById('gas_url').value = saved.GAS_EMAIL_URL;
+            if (saved.GAS_SECRET) document.getElementById('gas_secret').value = saved.GAS_SECRET;
+            if (saved.FLASK_BACKEND_URL) document.getElementById('flask_url').value = saved.FLASK_BACKEND_URL;
+            if (saved.DISCORD_WEBHOOK_ALERTS) document.getElementById('discord_alerts').value = saved.DISCORD_WEBHOOK_ALERTS;
+        })();
+
+        function saveConfig() {
+            const gasUrl = document.getElementById('gas_url').value.trim();
+            if (!gasUrl) {
+                alert('GAS デプロイURLは必須です');
+                document.getElementById('gas_url').focus();
+                return;
+            }
+
+            const config = {
+                PLACES_API_KEY: document.getElementById('places_key').value.trim(),
+                SPREADSHEET_ID: document.getElementById('sheet_id').value.trim(),
+                OAUTH_CLIENT_ID: document.getElementById('oauth_id').value.trim(),
+                GAS_EMAIL_URL: gasUrl,
+                GAS_SECRET: document.getElementById('gas_secret').value.trim(),
+                FLASK_BACKEND_URL: document.getElementById('flask_url').value.trim() || 'http://192.168.1.233:5001',
+                DISCORD_WEBHOOK_ALERTS: document.getElementById('discord_alerts').value.trim(),
+            };
+
+            localStorage.setItem('BLSE_CONFIG', JSON.stringify(config));
+
+            const msg = document.getElementById('successMsg');
+            msg.style.display = 'block';
+
+            // backパラメータがあればそこへ、なければsearch.htmlへ
+            const params = new URLSearchParams(location.search);
+            const back = params.get('back') || './search.html';
+            setTimeout(() => { location.href = back; }, 1200);
+        }
+
+        function clearConfig() {
+            if (!confirm('設定をすべて削除しますか？')) return;
+            localStorage.removeItem('BLSE_CONFIG');
+            location.reload();
+        }
+    </script>
+</body>
+
+</html>
