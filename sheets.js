@@ -18,17 +18,9 @@ const Sheets = (() => {
         return CONFIG.GAS_EMAIL_URL;
     }
 
-    // ── API遅延監視（N2）— 3000ms超えたらDiscord #alerts通知 ──────────
-    function _alertLatency(label, ms) {
-        if (ms <= 3000) return;
-        const wh = (typeof CONFIG !== 'undefined') && CONFIG.DISCORD_WEBHOOK_ALERTS;
-        if (!wh) return;
-        fetch(wh, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: `🟡 BLSE API遅延: ${label} ${Math.round(ms)}ms` }),
-        }).catch(() => { });
-    }
+    // ── API遅延監視（N2）— 無効化済み ───────────────────────────────────
+    // eslint-disable-next-line no-unused-vars
+    function _alertLatency(_label, _ms) { /* Discord通知は無効化 */ }
 
     // ── GET系リクエスト（readSheet） ──────────────────────────────────
     async function _get(params) {
