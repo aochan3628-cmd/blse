@@ -14,15 +14,20 @@
     GAS_SECRET: saved.GAS_SECRET || '',
     OAUTH_CLIENT_ID: '95449188194-ce0j9pbehfn5712o04evdb1kegp98mr5.apps.googleusercontent.com',
     FLASK_BACKEND_URL: saved.FLASK_BACKEND_URL || 'http://192.168.1.233:5001',
-    DISCORD_WEBHOOK_ALERTS: saved.DISCORD_WEBHOOK_ALERTS || '',
+    DISCORD_WEBHOOK_ALERTS: '', // 無効化済み
 
     SHEETS: {
-      UNCHECKED_HP: '未チェック（HP有り）',
-      UNCHECKED_SNS: '未チェック（SNSのみ）',
-      UNCHECKED_NONE: '未チェック（なし）',
+      INBOX: '★受信',               // 全件一時受け入れ
+      UNCHECKED_EMAIL: '未チェック（メール）',   // HP有り・メールあり
+      UNCHECKED_FORM: '未チェック（フォーム）', // HP有り・フォームのみ
+      SNS_ONLY: 'SNSのみ',
+      NONE: 'なし',
+      EXCLUDED: '除外',                 // スコア低い・却下
       CHECKED_EMAIL: 'チェック済み（メール）',
       CHECKED_FORM: 'チェック済み（フォーム）',
       SENT: '送信済み',
+      // 後方互換エイリアス
+      UNCHECKED_HP: '未チェック（メール）',
       PW_WAITING: 'Playwright失敗待ち',
       UNSENDABLE: '送信不可',
     }
